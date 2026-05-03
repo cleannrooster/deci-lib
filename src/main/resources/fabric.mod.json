@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "deci-lib",
+	"version": "${version}",
+	"name": "deci-lib",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/deci-lib/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.cleannrooster.decilib.Decilib"
+		],
+		"client": [
+			"com.cleannrooster.decilib.client.DecilibClient"
+		]
+	},
+	"mixins": [
+		"deci-lib.mixins.json",
+		{
+			"config": "deci-lib.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": ">=15",
+		"azurelib": "*"
+	}
+}

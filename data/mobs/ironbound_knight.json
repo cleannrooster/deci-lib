@@ -1,0 +1,36 @@
+{
+  "id": "ironbound_knight",
+  "archetype": "bruiser",
+  "tuning": {
+    "health":    "MEDIUM",
+    "damage":    "MEDIUM",
+    "speed":     "MEDIUM",
+    "detection": "MEDIUM"
+  },
+  "attributes": {
+    "knockback_resistance": 0.3,
+    "melee_range": 2.5
+  },
+  "features": [
+    {
+      "type":           "charge",
+      "ability_id":     "knight_charge",
+      "cooldown_ticks": 70,
+      "windup_ticks":   10,
+      "release_delay": 20,
+      "release_type":   "arc",
+      "half_angle_deg": 45.0,
+      "range":          4.5,
+      "coeff":          1.0,
+      "charge_speed":   2.0
+    },
+    {
+      "type":           "sweep",
+      "ability_id":     "knight_sweep",
+      "cooldown_ticks": 40,
+      "half_angle_deg": 55.0,
+      "range":          3.0,
+      "coeff":          0.8
+    }
+  ]
+}

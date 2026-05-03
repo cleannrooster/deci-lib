@@ -1,0 +1,42 @@
+{
+  "id": "voidling_scout",
+  "archetype": "skirmisher",
+  "form": "alien_biped",
+  "theme": "alien",
+  "tuning": {
+    "health":    "NONE",
+    "damage":    "LOW",
+    "speed":     "HIGH",
+    "detection": "MEDIUM"
+  },
+  "attributes": {
+    "max_health":    12.0,
+    "attack_damage":  3.0,
+    "melee_range":    1.5
+  },
+  "features": [
+    {
+      "type":                "idle",
+      "mode":                "mixed",
+      "wander_range":        12.0,
+      "pause_ticks":         15,
+      "scan_interval_ticks": 14
+    },
+    {
+      "type":                 "charge",
+      "ability_id":           "void_pulse",
+      "cooldown_ticks":       50,
+      "windup_ticks":         15,
+      "release_delay":        3,
+      "release_type":         "radial",
+      "range":                2.5,
+      "coeff":                0.55,
+      "charge_speed":         0,
+      "state":                "ATTACKING_MELEE",
+      "priority":             100,
+      "on_start_particles":   "portal_ring",
+      "on_tick_particles":    "portal_pulse",
+      "on_complete_particles":"portal_ring"
+    }
+  ]
+}

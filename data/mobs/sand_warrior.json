@@ -1,0 +1,24 @@
+{
+  "id": "sand_warrior",
+  "archetype": "ambusher",
+  "tuning": {
+    "health":    "MEDIUM",
+    "damage":    "LOW",
+    "speed":     "HIGH",
+    "detection": "MEDIUM"
+  },
+  "attributes": {
+    "attack_damage": 6.0,
+    "melee_range":   2.0
+  },
+  "features": [
+    {
+      "type":                   "ambush",
+      "detection_range":        16.0,
+      "ambush_radius":           4.5,
+      "scan_interval_ticks":    10,
+      "rehide_delay_ticks":     50,
+      "surface_cooldown_ticks": 30
+    }
+  ]
+}

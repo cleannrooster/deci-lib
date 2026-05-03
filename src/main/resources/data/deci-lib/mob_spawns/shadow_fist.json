@@ -1,0 +1,22 @@
+{
+  "mob_id": "shadow_fist",
+  "category": "monster",
+  "spawns": [
+    {
+      "weight": 5,
+      "group_size": [1, 1],
+      "biomes": ["#minecraft:is_forest", "#minecraft:is_jungle"],
+      "dimension": "minecraft:overworld",
+      "light_level": { "min": 0, "max": 7 },
+      "conditions": ["on_ground", "natural_only"]
+    },
+    {
+      "weight": 5,
+      "group_size": [2, 3],
+      "biomes": ["minecraft:dark_forest"],
+      "dimension": "minecraft:overworld",
+      "light_level": { "min": 0, "max": 11 },
+      "conditions": ["on_ground", "natural_only"]
+    }
+  ]
+}

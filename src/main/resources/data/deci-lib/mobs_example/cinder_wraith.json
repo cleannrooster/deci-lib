@@ -1,0 +1,46 @@
+{
+  "id": "cinder_wraith",
+  "archetype": "ambusher",
+  "form": "spectral_quadruped",
+  "theme": "magic",
+  "tuning": {
+    "health": "LOW",
+    "damage": "MEDIUM",
+    "speed": "HIGH",
+    "detection": "HIGH"
+  },
+  "attributes": { "attack_damage": 7.0, "melee_range": 2.0 },
+  "features": [
+    {
+      "type":                        "ambush",
+      "detection_range":             22.0,
+      "ambush_radius":               4.0,
+      "scan_interval_ticks":         8,
+      "rehide_delay_ticks":          25,
+      "on_hidden_tick_particles":    "ember_trail",
+      "on_rehide_complete_particles":"smoke_burst"
+    },
+    {
+      "type":                 "shockwave",
+      "ability_id":           "wraith_burst",
+      "cooldown_ticks":       70,
+      "min_cooldown":         20,
+      "range":                3.5,
+      "coeff":                1.25,
+      "state":                "ACTIVE",
+      "priority":             20,
+      "on_complete_particles":"soul_ring"
+    },
+    {
+      "type":           "sweep",
+      "ability_id":     "wraith_swipe",
+      "cooldown_ticks": 24,
+      "min_cooldown":   6,
+      "half_angle_deg": 60.0,
+      "range":          2.5,
+      "coeff":          0.65,
+      "state":          "ACTIVE",
+      "priority":       15
+    }
+  ]
+}

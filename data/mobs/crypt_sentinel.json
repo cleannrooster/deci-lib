@@ -1,0 +1,45 @@
+{
+  "id": "crypt_sentinel",
+  "archetype": "bruiser",
+  "tuning": {
+    "health":    "HIGH",
+    "damage":    "HIGH",
+    "speed":     "NONE",
+    "detection": "LOW"
+  },
+  "attributes": {
+    "knockback_resistance": 0.9,
+    "melee_range": 3.0
+  },
+  "features": [
+    {
+      "type":           "shockwave",
+      "ability_id":     "sentinel_shockwave",
+      "cooldown_ticks": 100,
+      "min_cooldown":   25,
+      "range":          4.5,
+      "coeff":          1.2
+    },
+    {
+      "type":           "sweep",
+      "ability_id":     "sentinel_sweep",
+      "cooldown_ticks": 50,
+      "min_cooldown":   15,
+      "half_angle_deg": 65.0,
+      "range":          3.5,
+      "coeff":          0.9
+    },
+    {
+      "type":           "charge",
+      "ability_id":     "sentinel_charge",
+      "cooldown_ticks": 80,
+      "windup_ticks":   14,
+      "release_delay": 20,
+      "release_type":   "arc",
+      "half_angle_deg": 40.0,
+      "range":          4.0,
+      "coeff":          1.4,
+      "charge_speed":   1.6
+    }
+  ]
+}

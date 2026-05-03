@@ -1,0 +1,34 @@
+{
+  "id": "cave_stalker",
+  "archetype": "ambusher",
+  "form": "stalker_quadruped",
+  "theme": "fantasy",
+  "attributes": {
+    "max_health":            40.0,
+    "attack_damage":         10.0,
+    "movement_speed":         0.28,
+    "follow_range":          24.0,
+    "knockback_resistance":   0.0
+  },
+  "features": [
+    {
+      "type":                      "ambush",
+      "detection_range":           18.0,
+      "ambush_radius":              5.0,
+      "scan_interval_ticks":       10,
+      "rehide_delay_ticks":        50,
+      "on_hidden_tick_particles":  "dust_trail"
+    },
+    {
+      "type":           "sweep",
+      "ability_id":     "stalker_swipe",
+      "cooldown_ticks": 22,
+      "min_cooldown":   6,
+      "half_angle_deg": 60.0,
+      "range":          2.5,
+      "coeff":          0.75,
+      "state":          "ACTIVE",
+      "priority":       15
+    }
+  ]
+}

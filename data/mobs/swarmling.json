@@ -1,0 +1,15 @@
+{
+  "id": "swarmling",
+  "archetype": "bruiser",
+  "tuning": {
+    "health":    "LOW",
+    "damage":    "LOW",
+    "speed":     "MEDIUM",
+    "detection": "LOW"
+  },
+  "attributes": {
+    "max_health":    8.0,
+    "attack_damage": 2.0,
+    "melee_range":   1.8
+  }
+}

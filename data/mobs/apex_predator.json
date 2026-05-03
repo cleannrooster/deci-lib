@@ -1,0 +1,27 @@
+{
+  "id": "apex_predator",
+  "archetype": "bruiser",
+  "tuning": {
+    "health":    "HIGH",
+    "damage":    "HIGH",
+    "speed":     "MEDIUM",
+    "detection": "HIGH"
+  },
+  "attributes": {
+    "knockback_resistance": 0.4,
+    "melee_range": 2.5
+  },
+  "features": [
+    {
+      "type":            "charge",
+      "cooldown_ticks":  60,
+      "windup_ticks":    8,
+      "release_delay": 20,
+      "release_type":    "arc",
+      "half_angle_deg":  55.0,
+      "range":           5.0,
+      "coeff":           1.5,
+      "charge_speed":    2.5
+    }
+  ]
+}
