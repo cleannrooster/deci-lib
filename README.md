@@ -7,6 +7,53 @@ This guide covers every field you can put in a mob data file under `data/<modid>
 
 ---
 
+## Table of Contents
+
+- [Top-level structure](#top-level-structure)
+- [Archetypes](#archetypes)
+  - [`bruiser`](#bruiser)
+  - [`skirmisher`](#skirmisher)
+  - [`ambusher`](#ambusher)
+- [AI Profiles](#ai-profiles)
+  - [Aggression axis](#aggression-axis)
+  - [Last-stand conditions](#last-stand-conditions)
+  - [Spatial axis](#spatial-axis)
+  - [Adaptation axis](#adaptation-axis)
+  - [Target evaluation axis](#target-evaluation-axis)
+  - [LEARNING implementation notes](#learning-implementation-notes)
+- [Forms](#forms)
+- [Render](#render)
+- [Scale](#scale)
+- [Tuning](#tuning)
+- [Attributes](#attributes)
+- [Sounds](#sounds)
+- [Features](#features)
+  - [Animations block](#animations-block)
+  - [Particle styles](#particle-styles)
+  - [States](#states)
+- [Feature Reference](#feature-reference)
+  - [`idle`](#idle)
+  - [`melee`](#melee)
+  - [`sweep`](#sweep)
+  - [`shockwave`](#shockwave)
+  - [`charge`](#charge)
+  - [`gapclose`](#gapclose)
+  - [`frenzy`](#frenzy)
+  - [`brace`](#brace)
+  - [`bulwark`](#bulwark)
+  - [`chase`](#chase)
+  - [`zone_denial`](#zone_denial)
+  - [`reset_punishment`](#reset_punishment)
+  - [`range_punish`](#range_punish)
+  - [`ambush`](#ambush)
+  - [`ambush_attack`](#ambush_attack)
+  - [`ranged_attack`](#ranged_attack)
+  - [`leave_hazard`](#leave_hazard)
+  - [`reposition`](#reposition)
+- [Complete examples](#complete-examples)
+
+---
+
 ## Top-level structure
 
 ```json
