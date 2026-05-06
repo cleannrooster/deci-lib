@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.builder;
 
+import com.cleannrooster.decilib.ai.profile.PartialAiProfile;
 import com.cleannrooster.decilib.builder.feature.FeatureConfig;
 import com.cleannrooster.decilib.builder.scale.ScaleProfile;
 import com.cleannrooster.decilib.builder.sound.SoundConfig;
@@ -23,7 +24,8 @@ public record MobProfile(
         List<FeatureConfig>          features,
         @Nullable AzurelibRenderConfig renderConfig,
         @Nullable SoundConfig        soundConfig,
-        @Nullable ScaleProfile       scaleProfile
+        @Nullable ScaleProfile       scaleProfile,
+        @Nullable PartialAiProfile   aiProfile
         ) {
     public MobProfile {
         features = List.copyOf(features);

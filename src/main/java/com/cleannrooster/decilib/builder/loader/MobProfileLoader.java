@@ -1,5 +1,10 @@
 package com.cleannrooster.decilib.builder.loader;
 
+import com.cleannrooster.decilib.ai.profile.AdaptationModel;
+import com.cleannrooster.decilib.ai.profile.AggressionModel;
+import com.cleannrooster.decilib.ai.profile.PartialAiProfile;
+import com.cleannrooster.decilib.ai.profile.SpatialModel;
+import com.cleannrooster.decilib.ai.profile.TargetEvalModel;
 import com.cleannrooster.decilib.builder.AttributeOverrides;
 import com.cleannrooster.decilib.builder.MobProfile;
 import com.cleannrooster.decilib.builder.MobProfileException;
@@ -168,7 +173,20 @@ public final class MobProfileLoader {
             }
         }
 
-        return new MobProfile(id, archetype, preset, tuning, attributeOverrides, form, theme, features, renderConfig, soundConfig,scaleProfile);
+        PartialAiProfile aiProfile = null;
+        if (json.has("ai_profile")) {
+            JsonObject ap = json.getAsJsonObject("ai_profile");
+            // "ai_profile": { "aggression": "calculating", "spatial": "territorial", ... }
+            // All fields are optional — missing fields fall back to the archetype default.
+            aiProfile = new PartialAiProfile(
+                    ap.has("aggression")  ? parseAxisEnum(AggressionModel.class,  ap.get("aggression").getAsString(),  id, "aggression")  : null,
+                    ap.has("spatial")     ? parseAxisEnum(SpatialModel.class,     ap.get("spatial").getAsString(),     id, "spatial")     : null,
+                    ap.has("adaptation")  ? parseAxisEnum(AdaptationModel.class,  ap.get("adaptation").getAsString(),  id, "adaptation")  : null,
+                    ap.has("target_eval") ? parseAxisEnum(TargetEvalModel.class,  ap.get("target_eval").getAsString(), id, "target_eval") : null
+            );
+        }
+
+        return new MobProfile(id, archetype, preset, tuning, attributeOverrides, form, theme, features, renderConfig, soundConfig, scaleProfile, aiProfile);
     }
 
     // -------------------------------------------------------------------------
@@ -282,5 +300,18 @@ public final class MobProfileLoader {
         float volume = obj.has("volume") ? obj.get("volume").getAsFloat() : SoundEntry.DEFAULT_VOLUME;
         float pitch  = obj.has("pitch")  ? obj.get("pitch").getAsFloat()  : SoundEntry.DEFAULT_PITCH;
         return new SoundEntry(obj.get("id").getAsString(), volume, pitch);
+    }
+
+    private static <E extends Enum<E>> E parseAxisEnum(Class<E> enumType, String raw,
+                                                        String profileId, String field) {
+        try {
+            return Enum.valueOf(enumType, raw.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            var valid = java.util.Arrays.stream(enumType.getEnumConstants())
+                    .map(c -> c.name().toLowerCase())
+                    .collect(java.util.stream.Collectors.joining(", "));
+            throw new MobProfileException("Profile '" + profileId + "': invalid ai_profile."
+                    + field + " '" + raw + "'. Valid values: " + valid);
+        }
     }
 }

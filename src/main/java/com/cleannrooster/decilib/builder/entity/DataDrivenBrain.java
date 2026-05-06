@@ -14,13 +14,18 @@ import com.cleannrooster.decilib.builder.MobStance;
 import com.cleannrooster.decilib.builder.MobState;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 
 
 final class DataDrivenBrain
         extends AbstractMobBrain<DataDrivenMob, MobStance, MobState> {
 
     static final Phase NORMAL = new Phase("normal", 0);
+
+    private static final double ALLY_SCAN_RADIUS   = 12.0;
+    private static final double THREAT_SCAN_RADIUS = 8.0;
 
     DataDrivenBrain(MobDefinition def) {
         super(new DefaultStateMachine<>(def.initialStance(), def.initialState()), NORMAL);
@@ -83,7 +88,30 @@ final class DataDrivenBrain
                    .hasLineOfSight(entity.canSee(target))
                    .targetHealthPct(target.getHealth() / target.getMaxHealth())
                    .targetIsBlocking(target.isBlocking());
+
+            // nearbyThreatCount: hostile entities near the target that are also targeting us
+            int threats = world.getEntitiesByClass(HostileEntity.class,
+                    target.getBoundingBox().expand(THREAT_SCAN_RADIUS),
+                    e -> e != entity && e.isAlive() && e.getTarget() == entity).size();
+            builder.nearbyThreatCount(threats);
         }
+
+        // isNearAnchor: within follow range of spawn anchor
+        BlockPos anchor = entity.getAnchorPos();
+        double followRange = entity.getDefinition().stats().followRange();
+        boolean nearAnchor = anchor == null
+                || entity.squaredDistanceTo(anchor.getX() + 0.5, anchor.getY() + 0.5, anchor.getZ() + 0.5)
+                   <= followRange * followRange;
+        builder.isNearAnchor(nearAnchor);
+
+        // fightProgressPct: totalDamageTaken / maxHealth, capped at 1.0
+        builder.fightProgressPct(Math.min(1f, entity.getTotalDamageTaken() / entity.getMaxHealth()));
+
+        // nearbyAllyCount: allied DataDrivenMob within ALLY_SCAN_RADIUS blocks
+        int allyCount = world.getEntitiesByClass(DataDrivenMob.class,
+                entity.getBoundingBox().expand(ALLY_SCAN_RADIUS),
+                e -> e != entity && e.isAlive()).size();
+        builder.nearbyAllyCount(allyCount);
 
         return builder.build();
     }

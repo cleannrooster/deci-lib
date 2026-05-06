@@ -21,6 +21,12 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     protected float   recentDamageTaken     = 0f;
     protected boolean lastHitWasProjectile  = false;
 
+    // AiProfile axes
+    protected boolean isNearAnchor      = false;
+    protected int     nearbyAllyCount   = 0;
+    protected float   fightProgressPct  = 0f;
+    protected int     nearbyThreatCount = 0;
+
     protected final B self() {
         return (B) this;
     }
@@ -42,6 +48,10 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     public B selfIsHidden(boolean v)              { this.selfIsHidden         = v; return self(); }
     public B recentDamageTaken(float v)           { this.recentDamageTaken    = v; return self(); }
     public B lastHitWasProjectile(boolean v)      { this.lastHitWasProjectile = v; return self(); }
+    public B isNearAnchor(boolean v)              { this.isNearAnchor      = v; return self(); }
+    public B nearbyAllyCount(int v)               { this.nearbyAllyCount   = v; return self(); }
+    public B fightProgressPct(float v)            { this.fightProgressPct  = v; return self(); }
+    public B nearbyThreatCount(int v)             { this.nearbyThreatCount = v; return self(); }
 
     public abstract S build();
 }

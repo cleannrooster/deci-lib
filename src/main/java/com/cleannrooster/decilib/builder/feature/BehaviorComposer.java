@@ -1,6 +1,7 @@
 package com.cleannrooster.decilib.builder.feature;
 
 import com.cleannrooster.decilib.ai.goal.MobBrainGoal;
+import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.ai.statemachine.TransitionContext;
 import com.cleannrooster.decilib.builder.MobStance;
 import com.cleannrooster.decilib.builder.MobState;
@@ -42,6 +43,8 @@ public final class BehaviorComposer {
     private final List<TransitionEntry>      transitions      = new ArrayList<>();
     private final List<StanceTransitionEntry> stanceTransitions = new ArrayList<>();
 
+    private AiProfile aiProfile;
+
     // -------------------------------------------------------------------------
     // Registration
     // -------------------------------------------------------------------------
@@ -69,4 +72,10 @@ public final class BehaviorComposer {
     public List<GoalEntry>             goals()             { return Collections.unmodifiableList(goals); }
     public List<TransitionEntry>       transitions()       { return Collections.unmodifiableList(transitions); }
     public List<StanceTransitionEntry> stanceTransitions() { return Collections.unmodifiableList(stanceTransitions); }
+
+    /** Called by {@code MobBuilder} before any archetype or feature applies its transitions. */
+    public void setAiProfile(AiProfile profile) { this.aiProfile = profile; }
+
+    /** Returns the resolved {@link AiProfile} for this mob. Available during {@code BehaviorFeature.apply()}. */
+    public AiProfile aiProfile() { return aiProfile; }
 }

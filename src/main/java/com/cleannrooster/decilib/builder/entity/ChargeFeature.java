@@ -118,11 +118,13 @@ public final class ChargeFeature implements BehaviorFeature {
                         .effects(buildChargeEffects(onStart, onComplete, finalRange, effectiveHalfAngle, hooks))
                         .build();
 
+        var gate = composer.aiProfile().combinedGate();
         composer.addTransition(
                 MobState.APPROACHING,
                 ctx -> ctx.stimulus().hasTarget()
                         && !ctx.stimulus().targetInMeleeRange()
-                        && ctx.cooldowns().isReady(abilityId),
+                        && ctx.cooldowns().isReady(abilityId)
+                        && gate.test(ctx),
                 state,
                 null,
                 15

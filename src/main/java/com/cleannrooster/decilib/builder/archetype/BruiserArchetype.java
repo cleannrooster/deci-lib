@@ -1,6 +1,11 @@
 package com.cleannrooster.decilib.builder.archetype;
 
 import com.cleannrooster.decilib.ai.goal.common.ApproachTargetBrainGoal;
+import com.cleannrooster.decilib.ai.profile.AdaptationModel;
+import com.cleannrooster.decilib.ai.profile.AggressionModel;
+import com.cleannrooster.decilib.ai.profile.AiProfile;
+import com.cleannrooster.decilib.ai.profile.SpatialModel;
+import com.cleannrooster.decilib.ai.profile.TargetEvalModel;
 import com.cleannrooster.decilib.builder.MobStance;
 import com.cleannrooster.decilib.builder.MobState;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
@@ -47,6 +52,12 @@ public final class BruiserArchetype implements Archetype {
                 TuningResolver.knockbackResistance(tuning.health()), // sturdier = more KB resist
                 2.5
         );
+    }
+
+    @Override
+    public AiProfile defaultAiProfile() {
+        return new AiProfile(AggressionModel.RELENTLESS, SpatialModel.ANYWHERE,
+                AdaptationModel.STATIC, TargetEvalModel.SOLO_PREDATOR);
     }
 
     @Override

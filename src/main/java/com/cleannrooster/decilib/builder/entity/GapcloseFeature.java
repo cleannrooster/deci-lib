@@ -110,11 +110,13 @@ public final class GapcloseFeature implements BehaviorFeature {
                 .effects(effects)
                 .build();
 
+        var gate = composer.aiProfile().combinedGate();
         composer.addTransition(
                 MobState.APPROACHING,
                 ctx -> ctx.stimulus().hasTarget()
                         && ctx.stimulus().targetDistance() > minDist
-                        && ctx.cooldowns().isReady(abilityId),
+                        && ctx.cooldowns().isReady(abilityId)
+                        && gate.test(ctx),
                 state,
                 null,
                 priority

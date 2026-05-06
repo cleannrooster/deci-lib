@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.builder;
 
+import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.builder.archetype.Archetype;
 import com.cleannrooster.decilib.builder.archetype.BaseStats;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
@@ -70,8 +71,19 @@ public final class MobBuilder {
         Archetype archetype = ArchetypeRegistry.get(resolved.archetype());
         // Safe — validator already confirmed it exists
 
+        // 5a. Resolve AiProfile — archetype default, overridden per-axis by JSON
+        AiProfile resolvedAiProfile = archetype.defaultAiProfile();
+        if (resolved.aiProfile() != null) {
+            resolvedAiProfile = resolvedAiProfile.merge(
+                    resolved.aiProfile().aggression(),
+                    resolved.aiProfile().spatial(),
+                    resolved.aiProfile().adaptation(),
+                    resolved.aiProfile().targetEval());
+        }
+
         // 6. Compose
         BehaviorComposer composer = new BehaviorComposer();
+        composer.setAiProfile(resolvedAiProfile);  // must be set before archetype.apply()
         archetype.apply(composer, tuning);
 
         for (var fc : resolved.features()) {
@@ -103,6 +115,7 @@ public final class MobBuilder {
                 archetype.initialStance(),
                 archetype.initialState(),
                 composer,
+                resolvedAiProfile,
                 resolved.renderConfig(),
                 resolved.soundConfig(),
                 scaleProfile

@@ -55,8 +55,11 @@ public final class MeleeFeature implements BehaviorFeature {
         var goal = new MeleeAttackBrainGoal<MobEntity>(abilityId, cooldown);
         if (effects != null) goal.withEffects(effects);
 
+        var gate = composer.aiProfile().combinedGate();
         composer.addTransition(null,
-                ctx -> ctx.stimulus().targetInMeleeRange() && ctx.cooldowns().isReady(abilityId),
+                ctx -> ctx.stimulus().targetInMeleeRange()
+                        && ctx.cooldowns().isReady(abilityId)
+                        && gate.test(ctx),
                 state, null, priority);
 
         composer.addGoal(goal, Set.of(state), priority);

@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.builder.archetype;
 
+import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.builder.MobStance;
 import com.cleannrooster.decilib.builder.MobState;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
@@ -24,4 +25,7 @@ public interface Archetype {
     BaseStats baseStats(TuningProfile tuning);
 
     void apply(BehaviorComposer composer, TuningProfile tuning);
+
+    /** Returns the default {@link AiProfile} for mobs using this archetype. */
+    AiProfile defaultAiProfile();
 }

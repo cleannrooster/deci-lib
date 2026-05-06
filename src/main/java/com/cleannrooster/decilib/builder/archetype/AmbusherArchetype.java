@@ -1,5 +1,10 @@
 package com.cleannrooster.decilib.builder.archetype;
 
+import com.cleannrooster.decilib.ai.profile.AdaptationModel;
+import com.cleannrooster.decilib.ai.profile.AggressionModel;
+import com.cleannrooster.decilib.ai.profile.AiProfile;
+import com.cleannrooster.decilib.ai.profile.SpatialModel;
+import com.cleannrooster.decilib.ai.profile.TargetEvalModel;
 import com.cleannrooster.decilib.builder.MobStance;
 import com.cleannrooster.decilib.builder.MobState;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
@@ -40,6 +45,12 @@ public final class AmbusherArchetype implements Archetype {
                 0.0,
                 2.0
         );
+    }
+
+    @Override
+    public AiProfile defaultAiProfile() {
+        return new AiProfile(AggressionModel.OPPORTUNIST, SpatialModel.PREDATORY,
+                AdaptationModel.STATIC, TargetEvalModel.SOLO_PREDATOR);
     }
 
     @Override

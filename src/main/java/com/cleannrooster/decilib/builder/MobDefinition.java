@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.builder;
 
+import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.builder.archetype.BaseStats;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
 import com.cleannrooster.decilib.builder.scale.ScaleProfile;
@@ -19,6 +20,7 @@ public record MobDefinition(
         MobStance        initialStance,
         MobState         initialState,
         BehaviorComposer composer,
+        AiProfile        aiProfile,
         @Nullable AzurelibRenderConfig renderConfig,
         @Nullable SoundConfig          soundConfig,
         @Nullable ScaleProfile scaleProfile

@@ -17,5 +17,12 @@ public record BaseAIStimulus(
         boolean selfIsInLava,
         boolean selfIsHidden,
         float recentDamageTaken,
-        boolean lastHitWasProjectile
+        boolean lastHitWasProjectile,
+        // AiProfile axes
+        boolean isNearAnchor,
+        int     nearbyAllyCount,
+        float   fightProgressPct,
+        int     nearbyThreatCount,
+        boolean targetNearObstacle,   // Phase 1 stub — always false
+        boolean allyUnderAttack       // Phase 1 stub — always false
 ) implements AIStimulus {}

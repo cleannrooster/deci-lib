@@ -112,11 +112,13 @@ public final class AmbushAttackFeature implements BehaviorFeature {
         // Enter ACTIVE from APPROACHING when the ability is off cooldown and target is at range.
         // Priority should be above the archetype's base approach (5) and charge (15) so the
         // ambush fires opportunistically when available, before falling back to a normal dash.
+        var gate = composer.aiProfile().combinedGate();
         composer.addTransition(
                 MobState.APPROACHING,
                 ctx -> ctx.stimulus().hasTarget()
                         && !ctx.stimulus().targetInMeleeRange()
-                        && ctx.cooldowns().isReady(abilityId),
+                        && ctx.cooldowns().isReady(abilityId)
+                        && gate.test(ctx),
                 MobState.ACTIVE,
                 null,
                 priority

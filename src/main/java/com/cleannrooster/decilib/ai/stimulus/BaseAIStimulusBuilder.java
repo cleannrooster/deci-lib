@@ -22,7 +22,13 @@ public final class BaseAIStimulusBuilder
                 selfIsInLava,
                 selfIsHidden,
                 recentDamageTaken,
-                lastHitWasProjectile
+                lastHitWasProjectile,
+                isNearAnchor,
+                nearbyAllyCount,
+                fightProgressPct,
+                nearbyThreatCount,
+                false,   // targetNearObstacle — Phase 1 stub
+                false    // allyUnderAttack    — Phase 1 stub
         );
     }
 }

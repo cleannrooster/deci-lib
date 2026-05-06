@@ -72,6 +72,12 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
     private boolean bulwarkActive  = false;
     private float   bulwarkReflect = 0f;
 
+    // AiProfile — anchor position (set on first spawn, persisted via NBT)
+    @Nullable private BlockPos anchorPos = null;
+
+    // AiProfile — total raw damage absorbed this fight (for fightProgressPct / ESCALATING)
+    private float totalDamageTaken = 0f;
+
     @Override
     public float getPathfindingPenalty(PathNodeType nodeType) {
         if (nodeType == PathNodeType.WATER || nodeType == PathNodeType.LAVA) {
@@ -213,6 +219,9 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
         if (definition.initialState() == MobState.HIDDEN) {
             enterHiddenState();
         }
+        if (anchorPos == null) {
+            anchorPos = this.getBlockPos();
+        }
         return data;
     }
 
@@ -235,6 +244,7 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
             ticksSinceLastHit    = 0;
             lastHitWasProjectile = source.isIn(DamageTypeTags.IS_PROJECTILE);
             recentDamageTaken   += amount;
+            totalDamageTaken    += amount;
         }
         return result;
     }
@@ -297,6 +307,9 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
         super.writeCustomDataToNbt(nbt);
         nbt.putBoolean("DeciHidden", hidden);
         nbt.putInt("DeciEmergeTicks", emergeTicks);
+        if (anchorPos != null) {
+            nbt.putLong("DeciAnchorPos", anchorPos.asLong());
+        }
     }
 
     @Override
@@ -306,9 +319,16 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
         if (nbt.getBoolean("DeciHidden")) {
             enterHiddenState();
         }
+        if (nbt.contains("DeciAnchorPos")) {
+            anchorPos = BlockPos.fromLong(nbt.getLong("DeciAnchorPos"));
+        }
     }
 
     public MobDefinition getDefinition()             { return definition; }
+
+    public @Nullable BlockPos getAnchorPos()         { return anchorPos; }
+
+    public float getTotalDamageTaken()               { return totalDamageTaken; }
 
     public MobBrain<DataDrivenMob> getMobBrain()     { return brain; }
 
