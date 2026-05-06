@@ -292,13 +292,11 @@ public class RangedAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<
 
         winddownCounter++;
         if (winddownCounter >= winddownTicks) {
-            if (ammoRemaining == -1) {
-                // Infinite ammo — exit so other goals can interleave between shots
+            if (ammoRemaining == -1 && shouldExitAfterShot()) {
                 cooldowns.trigger(abilityId, shotCooldownTicks);
                 if (effects != null && effects.onComplete() != null) effects.onComplete().accept(entity, world);
                 done = true;
             } else {
-                // Finite ammo, shots remaining — return to in-goal shot loop
                 shotCooldownCounter = shotCooldownTicks;
                 phase = Phase.IDLE;
             }
@@ -322,15 +320,20 @@ public class RangedAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<
             triggerAnim(entity, reloadStartAnim);
             if (onReloadStart != null) onReloadStart.accept(entity, world);
         } else if (ammoRemaining == -1) {
-            // Infinite ammo — exit the goal so other goals (e.g. reposition) can interleave.
-            // shotCooldownTicks is registered in the cooldown system as the between-shot pause.
+            // Infinite ammo. BASIC mode exits the goal after each shot so other goals
+            // (e.g. reposition) can interleave during the cooldown window.
+            // KITE and STRAFE stay in-goal so their IDLE movement logic keeps running
+            // and no other goal can walk the mob into the wrong position between shots.
             if (winddownTicks > 0) {
                 winddownCounter = 0;
                 phase = Phase.WINDING_DOWN;
-            } else {
+            } else if (shouldExitAfterShot()) {
                 cooldowns.trigger(abilityId, shotCooldownTicks);
                 if (effects != null && effects.onComplete() != null) effects.onComplete().accept(entity, world);
                 done = true;
+            } else {
+                shotCooldownCounter = shotCooldownTicks;
+                phase = Phase.IDLE;
             }
         } else {
             // Finite ammo, shots remaining — stay in goal and wait for next shot
@@ -343,6 +346,12 @@ public class RangedAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<
             }
         }
     }
+
+    // Only BASIC mode exits the goal after each infinite-ammo shot so that low-priority
+    // interleaving goals (e.g. reposition) can run during the cooldown window.
+    // KITE and STRAFE must remain active to keep their IDLE positioning logic running;
+    // yielding would let an approach goal walk the mob into the wrong range.
+    private boolean shouldExitAfterShot() { return mode == Mode.BASIC; }
 
     // ── Movement helpers ─────────────────────────────────────────────────────
 
