@@ -163,20 +163,54 @@ public class LeaveHazardBrainGoal<E extends MobEntity> implements MobBrainGoal<E
     // ── Escape actions ───────────────────────────────────────────────────────
 
     private boolean performTeleport(E entity, LivingEntity target, ServerWorld world) {
-        double range = Math.max(0, teleportRadius - teleportMinRadius);
+        double range   = Math.max(0, teleportRadius - teleportMinRadius);
+        int    centerY = BlockPos.ofFloored(target.getPos()).getY();
+
         for (int i = 0; i < teleportAttempts; i++) {
             double angle = world.random.nextDouble() * 2 * Math.PI;
             double dist  = teleportMinRadius + world.random.nextDouble() * range;
-            double x = target.getX() + Math.cos(angle) * dist;
-            double z = target.getZ() + Math.sin(angle) * dist;
-            BlockPos pos = BlockPos.ofFloored(x, target.getY(), z);
-            if (isValidTeleportPos(world, pos)) {
-                entity.teleport(x, target.getY(), z,true);
+            int    bx    = (int) Math.floor(target.getX() + Math.cos(angle) * dist);
+            int    bz    = (int) Math.floor(target.getZ() + Math.sin(angle) * dist);
+
+            BlockPos landing = findSafeLanding(world, bx, bz, centerY);
+            if (landing != null) {
+                entity.teleport(bx + 0.5, landing.getY(), bz + 0.5, true);
                 entity.getNavigation().stop();
                 return true;
             }
         }
         return false;
+    }
+
+    @Nullable
+    private BlockPos findSafeLanding(ServerWorld world, int bx, int bz, int centerY) {
+        // Scan a window around the target's Y, trying lower positions first so the
+        // mob lands on actual ground rather than floating in air.
+        int lo = Math.max(world.getBottomY() + 1, centerY - 8);
+        int hi = Math.min(world.getTopY()    - 2, centerY + 4);
+
+        for (int y = hi; y >= lo; y--) {
+            BlockPos ground = new BlockPos(bx, y,     bz);
+            BlockPos feet   = new BlockPos(bx, y + 1, bz);
+            BlockPos head   = new BlockPos(bx, y + 2, bz);
+
+            // Ground must be solid and completely dry (no fluid in or on it)
+            BlockState groundState = world.getBlockState(ground);
+            if (!groundState.isSolidBlock(world, ground)) continue;
+            if (!world.getFluidState(ground).isEmpty())   continue;
+
+            // The two blocks the mob occupies must be passable and dry
+            if (!isClearAndDry(world, feet)) continue;
+            if (!isClearAndDry(world, head)) continue;
+
+            return feet;
+        }
+        return null;
+    }
+
+    private boolean isClearAndDry(ServerWorld world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        return !state.blocksMovement() && world.getFluidState(pos).isEmpty();
     }
 
     private void performLaunch(E entity, LivingEntity target) {
@@ -187,12 +221,5 @@ public class LeaveHazardBrainGoal<E extends MobEntity> implements MobBrainGoal<E
         entity.setVelocity(dx, launchVerticalSpeed, dz);
         entity.velocityModified = true;
         entity.getNavigation().stop();
-    }
-
-    private boolean isValidTeleportPos(ServerWorld world, BlockPos pos) {
-        BlockState feet = world.getBlockState(pos);
-        BlockState head = world.getBlockState(pos.up());
-        return !feet.blocksMovement() && !feet.isLiquid()
-                && !head.blocksMovement() && !head.isLiquid();
     }
 }
