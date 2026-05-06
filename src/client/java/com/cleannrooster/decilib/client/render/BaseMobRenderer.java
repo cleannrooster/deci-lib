@@ -18,7 +18,6 @@ public abstract class BaseMobRenderer<T extends DataDrivenMob, M extends SingleP
         this.scale = scale;
     }
 
-    /** Called at the start of each {@link #render} call, before the model draws. */
     protected abstract void updateAnimationState(T entity, float tickDelta);
 
     @Override

@@ -1,5 +1,7 @@
 package com.cleannrooster.decilib.builder.entity;
 
+import com.cleannrooster.decilib.ai.CanBrace;
+import com.cleannrooster.decilib.ai.CanBulwark;
 import com.cleannrooster.decilib.ai.ambush.CanAmbush;
 import com.cleannrooster.decilib.ai.brain.BrainGoalWrapper;
 import com.cleannrooster.decilib.ai.brain.MobBrain;
@@ -20,7 +22,10 @@ import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.entity.ai.pathing.PathNodeType;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -39,7 +44,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 
-public class DataDrivenMob extends HostileEntity implements CanAmbush {
+public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace, CanBulwark {
 
     // Carries the MobDefinition across the super() call boundary so that
     // initGoals() can read it before the constructor body runs.
@@ -55,6 +60,25 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush {
     // Saturate at Integer.MAX_VALUE / 2 to avoid overflow when incrementing each tick.
     private int ticksSinceLastHit    = Integer.MAX_VALUE / 2;
     private int ticksSinceLastAttack = Integer.MAX_VALUE / 2;
+
+    // CanBrace
+    private boolean bracing              = false;
+    private float   braceReduction       = 0f;
+    private boolean lastHitWasProjectile = false;
+    private float   recentDamageTaken    = 0f;
+    private static final float RECENT_DAMAGE_DECAY = 0.5f;
+
+    // CanBulwark
+    private boolean bulwarkActive  = false;
+    private float   bulwarkReflect = 0f;
+
+    @Override
+    public float getPathfindingPenalty(PathNodeType nodeType) {
+        if (nodeType == PathNodeType.WATER || nodeType == PathNodeType.LAVA) {
+            return 48.0f;
+        }
+        return super.getPathfindingPenalty(nodeType);
+    }
 
     @Override
     public float getScale() {
@@ -194,10 +218,42 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush {
 
     @Override
     public boolean damage(DamageSource source, float amount) {
+        // Bulwark: block (and optionally reflect) incoming projectile damage
+        if (bulwarkActive && source.isIn(DamageTypeTags.IS_PROJECTILE)) {
+            if (bulwarkReflect > 0 && getWorld() instanceof ServerWorld sw
+                    && source.getAttacker() instanceof LivingEntity attacker) {
+                attacker.damage(sw.getDamageSources().thorns(this), amount * bulwarkReflect);
+            }
+            return false;
+        }
+        // Brace: reduce incoming damage
+        if (bracing && amount > 0) {
+            amount *= (1f - braceReduction);
+        }
         var result = super.damage(source, amount);
-        if (result) ticksSinceLastHit = 0;
+        if (result) {
+            ticksSinceLastHit    = 0;
+            lastHitWasProjectile = source.isIn(DamageTypeTags.IS_PROJECTILE);
+            recentDamageTaken   += amount;
+        }
         return result;
     }
+
+    // ── CanBrace ──────────────────────────────────────────────────────────────
+
+    @Override public void enterBraceState(float reduction) { bracing = true; braceReduction = reduction; }
+    @Override public void exitBraceState()                 { bracing = false; braceReduction = 0f; }
+    @Override public boolean isBracing()                   { return bracing; }
+    @Override public float   getBraceReduction()           { return braceReduction; }
+    @Override public boolean wasLastHitProjectile()        { return lastHitWasProjectile; }
+    @Override public float   getRecentDamageTaken()        { return recentDamageTaken; }
+
+    // ── CanBulwark ────────────────────────────────────────────────────────────
+
+    @Override public void    enterBulwark(float reflectCoeff) { bulwarkActive = true; bulwarkReflect = reflectCoeff; }
+    @Override public void    exitBulwark()                    { bulwarkActive = false; bulwarkReflect = 0f; }
+    @Override public boolean isBulwarkActive()                { return bulwarkActive; }
+    @Override public float   getBulwarkReflectCoeff()         { return bulwarkReflect; }
 
     @Override
     public boolean tryAttack(net.minecraft.entity.Entity target) {
@@ -213,6 +269,7 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush {
         if (emergeTicks > 0) emergeTicks--;
         if (ticksSinceLastHit    < Integer.MAX_VALUE / 2) ticksSinceLastHit++;
         if (ticksSinceLastAttack < Integer.MAX_VALUE / 2) ticksSinceLastAttack++;
+        if (recentDamageTaken > 0) recentDamageTaken = Math.max(0f, recentDamageTaken - RECENT_DAMAGE_DECAY);
     }
 
     public boolean isEmerging()              { return emergeTicks > 0; }
@@ -222,7 +279,7 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush {
 
     @Override
     public boolean isHidden() {
-        return isInvisible();
+        return hidden;
     }
 
 

@@ -18,7 +18,11 @@ public final class BaseAIStimulusBuilder
                 hasTarget,
                 selfIsOnGround,
                 selfIsInFluid,
-                selfIsHidden
+                selfIsInWater,
+                selfIsInLava,
+                selfIsHidden,
+                recentDamageTaken,
+                lastHitWasProjectile
         );
     }
 }

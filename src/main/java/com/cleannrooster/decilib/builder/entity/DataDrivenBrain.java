@@ -65,9 +65,13 @@ final class DataDrivenBrain
         builder.selfHealthPct(entity.getHealth() / entity.getMaxHealth())
                .selfIsOnGround(entity.isOnGround())
                .selfIsInFluid(entity.isTouchingWater() || entity.isInLava())
+               .selfIsInWater(entity.isTouchingWater())
+               .selfIsInLava(entity.isInLava())
                .selfIsHidden(entity.isHidden())
                .ticksSinceLastHit(entity.getTicksSinceLastHit())
-               .ticksSinceLastAttack(entity.getTicksSinceLastAttack());
+               .ticksSinceLastAttack(entity.getTicksSinceLastAttack())
+               .recentDamageTaken(entity.getRecentDamageTaken())
+               .lastHitWasProjectile(entity.wasLastHitProjectile());
 
         LivingEntity target = entity.getTarget();
         if (target != null && target.isAlive()) {

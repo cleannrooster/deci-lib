@@ -12,9 +12,9 @@
     },
     "loops": {
       "idle":   "animation.mob.idle_calm",
-      "idle_hostile":   "animation.mob.idle",
+      "idle_hostile":   "animation.mob.martial_stance",
       "moving": "animation.mob.walk_calm",
-      "moving_hostile": "animation.mob.walk",
+      "moving_hostile": "animation.mob.martial_stance",
       "running": "animation.mob.running"
 
     }
@@ -28,7 +28,7 @@
   "attributes": {
     "max_health": 40.0,
     "attack_damage": 5.0,
-    "melee_range":   2.0
+    "melee_range":   3.5
   },
   "features": [
     {
@@ -41,15 +41,15 @@
       "type":           "melee",
       "cooldown_ticks": 20,
       "animations": {
-        "on_action": "animation.mob.swing1"
+        "on_action": "animation.mob.punch_1"
       }
     },
     {
       "type":                  "ambush_attack",
       "ability_id":            "sand_vanish",
       "cooldown_ticks":        200,
-      "min_cooldown_ticks":    60,
-      "hidden_duration_ticks": 40,
+      "min_cooldown_ticks":    120,
+      "hidden_duration_ticks": 80,
       "movement_mode":         "strafe",
       "surface_mode":          "behind",
       "strafe_radius":         4.5,
@@ -64,8 +64,8 @@
     {
       "type":                  "charge",
       "ability_id":            "sand_dash",
-      "cooldown_ticks":        80,
-      "windup_ticks":          4,
+      "cooldown_ticks":        100,
+      "windup_ticks":          8,
       "release_delay":         10,
       "release_type":          "arc",
       "half_angle_deg":        50.0,
@@ -83,7 +83,7 @@
     {
       "type":           "sweep",
       "ability_id":     "sand_swipe",
-      "cooldown_ticks": 28,
+      "cooldown_ticks": 60,
       "min_cooldown":   8,
       "half_angle_deg": 55.0,
       "range":          2.5,

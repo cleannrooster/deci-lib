@@ -18,6 +18,11 @@ public abstract class BrainGoalWrapper<E extends MobEntity> extends Goal {
         setControls(EnumSet.of(Control.MOVE, Control.LOOK, Control.TARGET));
     }
     @Override
+    public boolean shouldRunEveryTick() {
+        return true;
+    }
+
+    @Override
     public boolean canStart() {
         return entity.getWorld() instanceof ServerWorld;
     }

@@ -41,14 +41,12 @@ public enum RendererPreset {
     private final Function<EntityRendererFactory.Context, EntityRenderer<DataDrivenMob>> factory;
 
     RendererPreset(Function<EntityRendererFactory.Context, ? extends EntityRenderer<DataDrivenMob>> factory) {
-        // Wildcard captured here; safe because the factory only ever returns a subtype.
         @SuppressWarnings("unchecked")
         Function<EntityRendererFactory.Context, EntityRenderer<DataDrivenMob>> typed =
                 (Function<EntityRendererFactory.Context, EntityRenderer<DataDrivenMob>>) (Function<?, ?>) factory;
         this.factory = typed;
     }
 
-    /** Creates the renderer for this preset using the given rendering context. */
     public EntityRenderer<DataDrivenMob> create(EntityRendererFactory.Context ctx) {
         return factory.apply(ctx);
     }

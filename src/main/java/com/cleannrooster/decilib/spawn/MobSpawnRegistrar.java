@@ -1,15 +1,17 @@
 package com.cleannrooster.decilib.spawn;
 
 import com.cleannrooster.decilib.Decilib;
+import com.cleannrooster.decilib.builder.entity.DataDrivenMob;
 import com.cleannrooster.decilib.entity.ModEntities;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
-import net.minecraft.block.enums.CameraSubmersionType;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnLocationTypes;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
@@ -18,7 +20,6 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.LightType;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.SpawnSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,40 +30,56 @@ public final class MobSpawnRegistrar {
 
     private MobSpawnRegistrar() {}
 
-    public static void registerAll() {
-        for (MobSpawnConfig config : MobSpawnRegistry.all()) {
-            register(config);
+    /**
+     * Registers a SpawnRestriction for every data-driven entity type. The predicate
+     * reads from MobSpawnRegistry at spawn time so it picks up changes from reloads.
+     * Call once after ModEntities.register().
+     */
+    public static void registerSpawnRestrictions() {
+        for (var entry : ModEntities.getDataDrivenMobs().entrySet()) {
+            String mobId = entry.getKey();
+            EntityType<DataDrivenMob> type = entry.getValue();
+            SpawnRestriction.register(
+                    type,
+                    SpawnLocationTypes.ON_GROUND,
+                    Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                    (entityType, world, reason, pos, random) ->
+                            MobSpawnRegistry.get(mobId)
+                                    .map(c -> anyEntryAllows(c.entries(), world, reason, pos))
+                                    .orElse(false));
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static void register(MobSpawnConfig config) {
-        EntityType<?> rawType = ModEntities.getDataDrivenMobs().get(config.mobId());
-        if (rawType == null) {
-            Decilib.LOGGER.warn("[deci-lib] Spawn config for '{}': entity type not registered, skipping",
-                    config.mobId());
-            return;
-        }
-
-        EntityType<? extends MobEntity> type = (EntityType<? extends MobEntity>) rawType;
-
-        // Add to biome spawn lists — one addSpawn call per entry
-        for (SpawnEntryConfig entry : config.entries()) {
-            var spawnEntry = new SpawnSettings.SpawnEntry(
-                    type, entry.weight(), entry.minGroupSize(), entry.maxGroupSize());
-            BiomeModifications.addSpawn(buildBiomeSelector(entry), config.spawnGroup(), spawnEntry.type, entry.weight(),entry.minGroupSize(), entry.maxGroupSize() );
-        }
-
-        // Runtime predicate — checked per spawn attempt, ANY entry match = allow
-        SpawnRestriction.register(
-                type,
-                SpawnLocationTypes.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
-                (entityType, world, reason, pos, random) -> anyEntryAllows(config.entries(), world, reason, pos));
+    /**
+     * Registers a single persistent BiomeModification that lazily reads from
+     * MobSpawnRegistry when biomes are built. Call once during onInitialize();
+     * the reload listener updates MobSpawnRegistry before biomes are processed.
+     */
+    public static void registerBiomeModification() {
+        BiomeModifications.create(Identifier.of(Decilib.MOD_ID, "mob_spawns"))
+                .add(ModificationPhase.ADDITIONS, ctx -> true, (ctx, mutable) -> {
+                    for (MobSpawnConfig config : MobSpawnRegistry.all()) {
+                        EntityType<?> rawType = ModEntities.getDataDrivenMobs().get(config.mobId());
+                        if (rawType == null) {
+                            Decilib.LOGGER.warn("[deci-lib] Biome modification: entity type '{}' not registered, skipping",
+                                    config.mobId());
+                            continue;
+                        }
+                        @SuppressWarnings("unchecked")
+                        EntityType<? extends MobEntity> type = (EntityType<? extends MobEntity>) rawType;
+                        for (SpawnEntryConfig entry : config.entries()) {
+                            if (!buildBiomeSelector(entry).test(ctx)) continue;
+                            mutable.getSpawnSettings().addSpawn(
+                                    config.spawnGroup(),
+                                    new net.minecraft.world.biome.SpawnSettings.SpawnEntry(
+                                            type, entry.weight(), entry.minGroupSize(), entry.maxGroupSize()));
+                        }
+                    }
+                });
     }
 
     // -------------------------------------------------------------------------
-    // Biome selector (runs at biome loading / registration time)
+    // Biome selector (evaluated at biome-build time)
     // -------------------------------------------------------------------------
 
     private static Predicate<BiomeSelectionContext> buildBiomeSelector(SpawnEntryConfig entry) {
@@ -124,20 +141,16 @@ public final class MobSpawnRegistrar {
                                        ServerWorldAccess world,
                                        SpawnReason reason,
                                        BlockPos pos) {
-        // Dimension — needs a concrete ServerWorld
         if (entry.dimension() != null && world instanceof net.minecraft.server.world.ServerWorld sw) {
             if (!sw.getRegistryKey().getValue().toString().equals(entry.dimension())) return false;
         }
 
-        // Height
         var y = pos.getY();
         if (y < entry.heightMin() || y > entry.heightMax()) return false;
 
-        // Block light level
         var light = world.getLightLevel(LightType.BLOCK, pos);
         if (light < entry.lightMin() || light > entry.lightMax()) return false;
 
-        // Conditions
         for (SpawnCondition cond : entry.conditions()) {
             switch (cond) {
                 case ON_GROUND    -> { if (!world.getBlockState(pos.down()).isSolid()) return false; }
@@ -147,7 +160,6 @@ public final class MobSpawnRegistrar {
             }
         }
 
-        // Biome — exact runtime check (double-checks BiomeModifications approximation)
         if (!entry.biomes().isEmpty()) {
             var biomeEntry = world.getBiome(pos);
             boolean biomeMatch = false;

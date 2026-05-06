@@ -12,7 +12,6 @@ public final class TextureTable {
 
     private TextureTable() {}
 
-    /** Returns the texture identifier for the given form and theme. */
     public static Identifier get(Form form, VisualTheme theme) {
         if (form == null) return FALLBACK;
         var string = form.name().toLowerCase();

@@ -13,5 +13,9 @@ public record BaseAIStimulus(
         boolean hasTarget,
         boolean selfIsOnGround,
         boolean selfIsInFluid,
-        boolean selfIsHidden
+        boolean selfIsInWater,
+        boolean selfIsInLava,
+        boolean selfIsHidden,
+        float recentDamageTaken,
+        boolean lastHitWasProjectile
 ) implements AIStimulus {}

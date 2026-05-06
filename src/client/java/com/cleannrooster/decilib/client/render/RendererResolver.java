@@ -14,12 +14,7 @@ public final class RendererResolver {
 
     private RendererResolver() {}
 
-    /**
-     * Returns the preset for {@code form}.
-     *
-     * @throws IllegalStateException if the form is not mapped — indicates a
-     *         missing entry in {@link #buildTable()} after adding a new enum value
-     */
+
     public static RendererPreset resolve(Form form) {
         var preset = TABLE.get(form);
         if (preset == null) {

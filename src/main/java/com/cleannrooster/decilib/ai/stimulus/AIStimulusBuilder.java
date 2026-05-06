@@ -15,7 +15,11 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     protected boolean hasTarget = false;
     protected boolean selfIsOnGround = true;
     protected boolean selfIsInFluid = false;
-    protected boolean selfIsHidden = false;
+    protected boolean selfIsInWater = false;
+    protected boolean selfIsInLava  = false;
+    protected boolean selfIsHidden          = false;
+    protected float   recentDamageTaken     = 0f;
+    protected boolean lastHitWasProjectile  = false;
 
     protected final B self() {
         return (B) this;
@@ -33,7 +37,11 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     public B hasTarget(boolean v)              { this.hasTarget = v;               return self(); }
     public B selfIsOnGround(boolean v)         { this.selfIsOnGround = v;          return self(); }
     public B selfIsInFluid(boolean v)          { this.selfIsInFluid = v;           return self(); }
-    public B selfIsHidden(boolean v)           { this.selfIsHidden = v;            return self(); }
+    public B selfIsInWater(boolean v)          { this.selfIsInWater = v;           return self(); }
+    public B selfIsInLava(boolean v)           { this.selfIsInLava  = v;           return self(); }
+    public B selfIsHidden(boolean v)              { this.selfIsHidden         = v; return self(); }
+    public B recentDamageTaken(float v)           { this.recentDamageTaken    = v; return self(); }
+    public B lastHitWasProjectile(boolean v)      { this.lastHitWasProjectile = v; return self(); }
 
     public abstract S build();
 }

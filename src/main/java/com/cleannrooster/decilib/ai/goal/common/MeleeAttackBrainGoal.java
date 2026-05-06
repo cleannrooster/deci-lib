@@ -54,6 +54,7 @@ public class MeleeAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<E
 
         var target = entity.getTarget();
         if (target != null && RangePredicates.isValidTarget(target)) {
+            entity.getLookControl().lookAt(target, 30f, 30f);
             if (effects != null && effects.onAction() != null) effects.onAction().accept(entity, world);
             entity.tryAttack(target);
         }

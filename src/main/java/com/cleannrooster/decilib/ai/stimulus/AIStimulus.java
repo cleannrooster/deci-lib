@@ -42,5 +42,17 @@ public interface AIStimulus {
 
     boolean selfIsInFluid();
 
+    boolean selfIsInWater();
+
+    boolean selfIsInLava();
+
     boolean selfIsHidden();
+
+    // -------------------------------------------------------------------------
+    // Recent combat history
+    // -------------------------------------------------------------------------
+
+    float recentDamageTaken();
+
+    boolean lastHitWasProjectile();
 }

@@ -31,7 +31,7 @@
   },
 
   "attributes": {
-    "max_health": 40.0,
+    "max_health": 60.0,
     "attack_damage": 10.0,
     "melee_range": 3.0,
     "knockback_resistance": 0.5
@@ -53,8 +53,8 @@
       "min_cooldown_ticks": 80,
       "charge_speed":          0,
       "upwards_speed":         0,
-      "windup_ticks": 12,
-      "release_delay": 20,
+      "windup_ticks": 24,
+      "release_delay": 40,
 
       "release_type": "radial",
       "range": 4.5,
@@ -77,8 +77,8 @@
       "min_cooldown_ticks": 80,
       "charge_speed":          0,
       "upwards_speed":         0,
-      "windup_ticks": 10,
-      "release_delay": 6,
+      "windup_ticks": 20,
+      "release_delay": 12,
 
       "release_type": "arc",
       "range": 4.5,
@@ -96,7 +96,7 @@
 
     {
       "type": "melee",
-      "cooldown_ticks": 15,
+      "cooldown_ticks": 30,
       "priority": 60,
 
       "animations": {

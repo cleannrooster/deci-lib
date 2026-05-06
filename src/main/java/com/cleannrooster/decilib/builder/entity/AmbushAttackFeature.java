@@ -89,6 +89,8 @@ public final class AmbushAttackFeature implements BehaviorFeature {
             default           -> AmbushAttackBrainGoal.SurfaceMode.BEHIND;
         };
 
+        var hideVisuals  = config.getBoolean("hide_visuals",   true);
+        var loopAnim     = config.getString("ambush_loop_anim", "");
         var onTick      = ParticleStyle.fromString(config.getString("on_tick_particles",      "none"));
         var onComplete  = ParticleStyle.fromString(config.getString("on_complete_particles",  "none"));
         var onInterrupt = ParticleStyle.fromString(config.getString("on_interrupt_particles", "none"));
@@ -103,6 +105,8 @@ public final class AmbushAttackFeature implements BehaviorFeature {
 
         var goal = new AmbushAttackBrainGoal<DataDrivenMob>(
                 abilityId, cooldown, minCd, duration, movement, surface, radius, burrow)
+                .hideVisuals(hideVisuals)
+                .ambushLoopAnim(loopAnim)
                 .withEffects(effects);
 
         // Enter ACTIVE from APPROACHING when the ability is off cooldown and target is at range.

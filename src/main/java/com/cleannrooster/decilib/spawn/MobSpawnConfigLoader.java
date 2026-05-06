@@ -4,56 +4,17 @@ import com.cleannrooster.decilib.Decilib;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.SpawnGroup;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 
 public final class MobSpawnConfigLoader {
 
-    private static final String SPAWN_PATH = "data/deci-lib/mob_spawns";
-
     private MobSpawnConfigLoader() {}
-
-
-    public static void loadAll() {
-        FabricLoader.getInstance().getModContainer(Decilib.MOD_ID).ifPresent(container -> {
-            for (Path root : container.getRootPaths()) {
-                Path spawnDir = root.resolve(SPAWN_PATH);
-                if (!Files.isDirectory(spawnDir)) continue;
-
-                try (Stream<Path> paths = Files.walk(spawnDir, 1)) {
-                    paths.filter(p -> p.getFileName().toString().endsWith(".json"))
-                         .forEach(MobSpawnConfigLoader::loadFile);
-                } catch (IOException e) {
-                    Decilib.LOGGER.error("[deci-lib] Failed to scan spawn configs in {}: {}",
-                            spawnDir, e.getMessage(), e);
-                }
-            }
-        });
-    }
-
-    private static void loadFile(Path path) {
-        try (Reader r = Files.newBufferedReader(path)) {
-            JsonObject json = JsonParser.parseReader(r).getAsJsonObject();
-            MobSpawnConfig config = parse(json, path.getFileName().toString());
-            MobSpawnRegistry.register(config);
-            Decilib.LOGGER.info("[deci-lib] Loaded spawn config '{}' ({} entries)",
-                    config.mobId(), config.entries().size());
-        } catch (Exception e) {
-            Decilib.LOGGER.error("[deci-lib] Failed to load spawn config {}: {}", path.getFileName(), e.getMessage(), e);
-        }
-    }
 
     // -------------------------------------------------------------------------
 

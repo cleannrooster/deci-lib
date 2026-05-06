@@ -26,17 +26,13 @@ public final class DamageUtil {
 
         var hit = new ArrayList<LivingEntity>();
 
-        if (RangePredicates.isValidTarget(primaryTarget)) {
-            primaryTarget.damage(source, damage);
-            hit.add(primaryTarget);
-        }
 
         var cosThreshold = Math.cos(Math.toRadians(halfAngleDeg));
         var facingDir = attacker.getRotationVec(1.0f);
         var searchBox = buildSearchBox(attacker, range);
 
         for (LivingEntity entity : world.getEntitiesByClass(LivingEntity.class, searchBox, e -> true)) {
-            if (entity == attacker || entity == primaryTarget) continue;
+            if (entity == attacker ) continue;
             if (!RangePredicates.isValidTarget(entity)) continue;
             if (attacker.isTeammate(entity)) continue;
 
@@ -70,6 +66,32 @@ public final class DamageUtil {
             if (attacker.isTeammate(entity)) continue;
 
             if (attacker.squaredDistanceTo(entity) <= range * range) {
+                entity.damage(source, damage);
+                hit.add(entity);
+            }
+        }
+
+        return hit;
+    }
+
+    public static List<LivingEntity> performRingDamage(
+            LivingEntity attacker,
+            double innerRadius,
+            double outerRadius,
+            float damage,
+            DamageSource source,
+            ServerWorld world) {
+
+        var hit = new ArrayList<LivingEntity>();
+        var searchBox = buildSearchBox(attacker, outerRadius);
+
+        for (LivingEntity entity : world.getEntitiesByClass(LivingEntity.class, searchBox, e -> true)) {
+            if (entity == attacker) continue;
+            if (!RangePredicates.isValidTarget(entity)) continue;
+            if (attacker.isTeammate(entity)) continue;
+
+            var distSq = attacker.squaredDistanceTo(entity);
+            if (distSq >= innerRadius * innerRadius && distSq <= outerRadius * outerRadius) {
                 entity.damage(source, damage);
                 hit.add(entity);
             }

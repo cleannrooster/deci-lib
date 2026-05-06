@@ -63,7 +63,7 @@ public final class ModEntities {
     }
 
     private static void discoverAndRegisterDataMobs() {
-        FabricLoader.getInstance().getModContainer(Decilib.MOD_ID).ifPresent(container -> {
+        for (var container : FabricLoader.getInstance().getAllMods()) {
             for (Path root : container.getRootPaths()) {
                 Path mobsDir = root.resolve(MOBS_PATH);
                 if (!Files.exists(mobsDir)) continue;
@@ -74,7 +74,7 @@ public final class ModEntities {
                     LOGGER.error("[deci-lib] Failed to scan mob profiles in {}: {}", mobsDir, e.getMessage(), e);
                 }
             }
-        });
+        }
     }
 
     private static void registerFromPath(Path path) {

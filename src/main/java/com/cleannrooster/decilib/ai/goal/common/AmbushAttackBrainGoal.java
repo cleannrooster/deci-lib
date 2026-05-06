@@ -7,6 +7,8 @@ import com.cleannrooster.decilib.ai.goal.GoalEffects;
 import com.cleannrooster.decilib.ai.goal.MobBrainGoal;
 import com.cleannrooster.decilib.ai.goal.StopReason;
 import com.cleannrooster.decilib.ai.stimulus.AIStimulus;
+import com.cleannrooster.decilib.builder.animation.MobAnimationDispatcherRegistry;
+import com.cleannrooster.decilib.builder.entity.DataDrivenMob;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -36,6 +38,8 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
     private final boolean      burrowMode;
 
     @Nullable private GoalEffects<E> effects;
+    private           boolean        useHideVisuals = true;
+    @Nullable private String         ambushLoopAnim = null;
 
     // per-activation state
     private int         ticksHidden;
@@ -60,6 +64,26 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
     /** Attaches lifecycle effect callbacks. */
     public AmbushAttackBrainGoal<E> withEffects(GoalEffects<E> effects) {
         this.effects = effects;
+        return this;
+    }
+
+    /**
+     * When {@code false}, the mob is not made invisible during the ambush/burrow phase.
+     * Use this when the mob implements its own visuals (e.g. a burrow animation).
+     * Defaults to {@code true}.
+     */
+    public AmbushAttackBrainGoal<E> hideVisuals(boolean v) {
+        this.useHideVisuals = v;
+        return this;
+    }
+
+    /**
+     * Animation name to play as a looping animation for the duration of the ambush/burrow.
+     * Suppresses normal loop-animation tracking while the goal is active.
+     * Pass {@code null} or blank to disable (default).
+     */
+    public AmbushAttackBrainGoal<E> ambushLoopAnim(@Nullable String anim) {
+        this.ambushLoopAnim = (anim != null && !anim.isBlank()) ? anim : null;
         return this;
     }
 
@@ -100,6 +124,14 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
         }
 
         entity.enterHiddenState();
+        if (!useHideVisuals) entity.setInvisible(false);
+
+        if (ambushLoopAnim != null && entity instanceof DataDrivenMob ddm) {
+            // Suppress normal loop tracking for the full expected duration so the
+            // ambush animation is not overridden. Resets in stop() regardless.
+            ddm.getLoopAnimTracker().suppressFor(hiddenDurationTicks + 5);
+            MobAnimationDispatcherRegistry.get().triggerLoop(ddm, ambushLoopAnim);
+        }
     }
 
     @Override
@@ -143,6 +175,7 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
             if (entity.isHidden()) entity.exitHiddenState();
             if (effects != null && effects.onInterrupt() != null) effects.onInterrupt().accept(entity, world);
         }
+        stopAmbushAnimation(entity);
     }
 
     @Override
@@ -151,6 +184,7 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
             if (entity.isHidden()) entity.exitHiddenState();
             if (effects != null && effects.onInterrupt() != null) effects.onInterrupt().accept(entity, world);
         }
+        stopAmbushAnimation(entity);
     }
 
     @Override
@@ -161,6 +195,13 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
         }
         if (!surfaced && reason == StopReason.PREEMPTED) {
             cooldowns.trigger(abilityId, minCooldownTicks);
+        }
+        stopAmbushAnimation(entity);
+    }
+
+    private void stopAmbushAnimation(E entity) {
+        if (ambushLoopAnim != null && entity instanceof DataDrivenMob ddm) {
+            ddm.getLoopAnimTracker().reset();
         }
     }
 
