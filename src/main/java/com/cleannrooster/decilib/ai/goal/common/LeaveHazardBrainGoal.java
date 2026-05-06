@@ -171,7 +171,7 @@ public class LeaveHazardBrainGoal<E extends MobEntity> implements MobBrainGoal<E
             double z = target.getZ() + Math.sin(angle) * dist;
             BlockPos pos = BlockPos.ofFloored(x, target.getY(), z);
             if (isValidTeleportPos(world, pos)) {
-                entity.teleport(x, target.getY(), z);
+                entity.teleport(x, target.getY(), z,true);
                 entity.getNavigation().stop();
                 return true;
             }
