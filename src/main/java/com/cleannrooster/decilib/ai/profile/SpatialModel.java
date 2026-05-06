@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.ai.profile;
 
+import com.cleannrooster.decilib.ai.stimulus.AIStimulus;
 import com.cleannrooster.decilib.ai.statemachine.TransitionContext;
 
 import java.util.function.Predicate;
@@ -9,9 +10,9 @@ public enum SpatialModel {
     /** No spatial requirement — attacks from any position. */
     ANYWHERE {
         @Override
-        public Predicate<TransitionContext> offensiveGate() {
-            return ctx -> true;
-        }
+        public Predicate<TransitionContext> offensiveGate() { return ctx -> true; }
+        @Override
+        public Predicate<AIStimulus> stimulusGate()         { return s -> true; }
     },
 
     /**
@@ -22,6 +23,10 @@ public enum SpatialModel {
         @Override
         public Predicate<TransitionContext> offensiveGate() {
             return ctx -> ctx.stimulus().isNearAnchor();
+        }
+        @Override
+        public Predicate<AIStimulus> stimulusGate() {
+            return AIStimulus::isNearAnchor;
         }
     },
 
@@ -35,6 +40,11 @@ public enum SpatialModel {
             // Phase 1 stub: always passes. Real implementation needs ctx.stimulus().targetNearObstacle().
             return ctx -> true;
         }
+        @Override
+        public Predicate<AIStimulus> stimulusGate() {
+            // Phase 1 stub: always passes. Real implementation needs s.targetNearObstacle().
+            return s -> true;
+        }
     },
 
     /**
@@ -46,7 +56,12 @@ public enum SpatialModel {
         public Predicate<TransitionContext> offensiveGate() {
             return ctx -> ctx.stimulus().nearbyAllyCount() >= 2;
         }
+        @Override
+        public Predicate<AIStimulus> stimulusGate() {
+            return s -> s.nearbyAllyCount() >= 2;
+        }
     };
 
     public abstract Predicate<TransitionContext> offensiveGate();
+    public abstract Predicate<AIStimulus> stimulusGate();
 }

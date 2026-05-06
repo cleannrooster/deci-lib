@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.ai.profile;
 
+import com.cleannrooster.decilib.ai.stimulus.AIStimulus;
 import com.cleannrooster.decilib.ai.statemachine.TransitionContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,27 @@ public record AiProfile(
                 .and(spatial.offensiveGate())
                 .and(adaptation.offensiveGate())
                 .and(targetEval.offensiveGate());
+    }
+
+    /**
+     * Stimulus-only version of {@link #combinedGate()} for goals that receive
+     * only {@link AIStimulus} (e.g. {@code ApproachTargetBrainGoal.canStart}).
+     */
+    public Predicate<AIStimulus> combinedStimulusGate() {
+        return aggression.stimulusGate()
+                .and(spatial.stimulusGate())
+                .and(adaptation.stimulusGate())
+                .and(targetEval.stimulusGate());
+    }
+
+    /**
+     * Last-stand override gate. When this passes, offensive transitions fire
+     * regardless of {@link #combinedGate()} (logical OR).
+     * Phase stub — always {@code false}. Wire to {@code selfHealthPct < 0.15f}
+     * when implementing the last-stand mechanic.
+     */
+    public Predicate<TransitionContext> lastStandGate() {
+        return ctx -> false;
     }
 
     /**

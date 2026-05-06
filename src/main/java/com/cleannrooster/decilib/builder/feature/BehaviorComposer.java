@@ -68,6 +68,25 @@ public final class BehaviorComposer {
         stanceTransitions.add(new StanceTransitionEntry(from, condition, to, priority));
     }
 
+    /**
+     * Shorthand for offensive entry transitions. Automatically applies
+     * {@link AiProfile#combinedGate()} ANDed with {@code baseCondition},
+     * OR'd with {@link AiProfile#lastStandGate()} so desperate mobs can still
+     * commit even when normal conditions are unfavorable.
+     *
+     * <p>Use this instead of {@link #addTransition} for any transition that
+     * represents a mob choosing to attack.
+     */
+    public void addOffensiveTransition(@Nullable MobState from,
+            Predicate<TransitionContext> baseCondition, MobState to,
+            @Nullable MobStance stanceFilter, int priority) {
+        var gate      = aiProfile.combinedGate();
+        var lastStand = aiProfile.lastStandGate();
+        addTransition(from,
+                ctx -> (baseCondition.test(ctx) && gate.test(ctx)) || lastStand.test(ctx),
+                to, stanceFilter, priority);
+    }
+
 
     public List<GoalEntry>             goals()             { return Collections.unmodifiableList(goals); }
     public List<TransitionEntry>       transitions()       { return Collections.unmodifiableList(transitions); }

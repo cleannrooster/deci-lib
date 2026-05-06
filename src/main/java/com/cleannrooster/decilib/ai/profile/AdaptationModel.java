@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.ai.profile;
 
+import com.cleannrooster.decilib.ai.stimulus.AIStimulus;
 import com.cleannrooster.decilib.ai.statemachine.TransitionContext;
 
 import java.util.function.Predicate;
@@ -9,9 +10,9 @@ public enum AdaptationModel {
     /** Behavior is identical throughout the fight. */
     STATIC {
         @Override
-        public Predicate<TransitionContext> offensiveGate() {
-            return ctx -> true;
-        }
+        public Predicate<TransitionContext> offensiveGate() { return ctx -> true; }
+        @Override
+        public Predicate<AIStimulus> stimulusGate()         { return s -> true; }
     },
 
     /**
@@ -22,6 +23,10 @@ public enum AdaptationModel {
         @Override
         public Predicate<TransitionContext> offensiveGate() {
             return ctx -> ctx.stimulus().fightProgressPct() >= 0.30f;
+        }
+        @Override
+        public Predicate<AIStimulus> stimulusGate() {
+            return s -> s.fightProgressPct() >= 0.30f;
         }
     },
 
@@ -36,7 +41,13 @@ public enum AdaptationModel {
             // Phase 1 stub: always passes. Real implementation needs per-ability hit rate data.
             return ctx -> true;
         }
+        @Override
+        public Predicate<AIStimulus> stimulusGate() {
+            // Phase 1 stub: always passes. Real implementation needs per-ability hit rate data.
+            return s -> true;
+        }
     };
 
     public abstract Predicate<TransitionContext> offensiveGate();
+    public abstract Predicate<AIStimulus> stimulusGate();
 }

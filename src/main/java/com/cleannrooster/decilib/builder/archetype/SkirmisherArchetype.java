@@ -32,7 +32,8 @@ public final class SkirmisherArchetype implements Archetype {
     @Override
     public Set<MobState> supportedStates() {
         return Set.of(
-                MobState.IDLE, MobState.APPROACHING, MobState.ATTACKING_MELEE, MobState.FLEEING,
+                MobState.IDLE, MobState.APPROACHING, MobState.ATTACKING_MELEE,
+                MobState.FLEEING, MobState.RETREATING,
                 MobState.CHARGING,           // used by ChargeFeature
                 MobState.ACTIVE,             // used by AmbushAttackFeature
                 MobState.HIDDEN, MobState.REHIDING
@@ -68,7 +69,9 @@ public final class SkirmisherArchetype implements Archetype {
         var speed     = TuningResolver.movementSpeed(tuning.speed()) / 0.28;
         var fleeSpeed = speed * 1.3;
         var fleeRange = TuningResolver.followRange(tuning.detection());
+        var profile   = composer.aiProfile();
 
+        // Low-health flee (always active, regardless of aggression axis)
         composer.addTransition(MobState.IDLE,
                 ctx -> ctx.stimulus().hasTarget() && ctx.stimulus().selfHealthPct() < FLEE_HEALTH,
                 MobState.FLEEING, null, 15);
@@ -84,6 +87,27 @@ public final class SkirmisherArchetype implements Archetype {
                     || ctx.stimulus().targetDistance() > fleeRange,
                 MobState.IDLE, null, 20);
 
+        // CALCULATING: active retreat when at a health disadvantage (>20% below target).
+        // Priority 8 — below low-health flee (15) but above normal approach (5).
+        if (profile.aggression() == AggressionModel.CALCULATING) {
+            composer.addTransition(MobState.APPROACHING,
+                    ctx -> ctx.stimulus().hasTarget()
+                            && ctx.stimulus().selfHealthPct() < ctx.stimulus().targetHealthPct() - 0.2f,
+                    MobState.RETREATING, null, 8);
+            composer.addTransition(MobState.ATTACKING_MELEE,
+                    ctx -> ctx.stimulus().hasTarget()
+                            && ctx.stimulus().selfHealthPct() < ctx.stimulus().targetHealthPct() - 0.2f,
+                    MobState.RETREATING, null, 8);
+
+            composer.addTransition(MobState.RETREATING,
+                    ctx -> !ctx.stimulus().hasTarget()
+                            || ctx.stimulus().selfHealthPct() >= ctx.stimulus().targetHealthPct() - 0.1f,
+                    MobState.APPROACHING, null, 15);
+
+            composer.addGoal(new FleeEntityBrainGoal<>(fleeRange, fleeSpeed),
+                    Set.of(MobState.RETREATING), 8);
+        }
+
         composer.addTransition(null,
                 ctx -> !ctx.stimulus().hasTarget(),
                 MobState.IDLE, null, 0);
@@ -92,8 +116,10 @@ public final class SkirmisherArchetype implements Archetype {
                 ctx -> ctx.stimulus().hasTarget() && !ctx.stimulus().targetInMeleeRange(),
                 MobState.APPROACHING, null, 5);
 
-        // Goals
-        composer.addGoal(new ApproachTargetBrainGoal<>(speed),
+        // Goals — hold at standoff when conditions aren't favourable
+        composer.addGoal(
+                new ApproachTargetBrainGoal<>(speed)
+                        .withStandoff(8.0, profile.combinedStimulusGate()),
                 Set.of(MobState.APPROACHING), 5);
 
         composer.addGoal(new FleeEntityBrainGoal<>(fleeRange, fleeSpeed),

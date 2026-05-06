@@ -133,12 +133,10 @@ public final class FrenzyFeature implements BehaviorFeature {
                 .frenzyLoopAnim(loopAnim)
                 .withEffects(effects);
 
-        var gate = composer.aiProfile().combinedGate();
-        composer.addTransition(
+        composer.addOffensiveTransition(
                 null,
                 ctx -> ctx.stimulus().hasTarget()
-                        && ctx.cooldowns().isReady(abilityId)
-                        && gate.test(ctx),
+                        && ctx.cooldowns().isReady(abilityId),
                 state,
                 null,
                 priority
