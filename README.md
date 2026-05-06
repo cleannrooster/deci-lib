@@ -1,5 +1,8 @@
 # deci-lib — Mob JSON Guide
 
+
+WARNING: This guide's generation was assisted heavily by AI! It was heavily scrutinized, but might contain inaccuracies! Consult with me (Forg/Cleannrooster) directly if you are unsure.
+
 This guide covers every field you can put in a mob data file under `data/<modid>/mobs/<id>.json`.
 
 ---
