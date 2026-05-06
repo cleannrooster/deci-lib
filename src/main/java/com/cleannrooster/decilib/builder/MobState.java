@@ -5,11 +5,11 @@ public enum MobState {
     IDLE,
     WANDERING,
     APPROACHING,
-    FLEEING,
     HIDDEN,
     ACTIVE,
     REHIDING,
     ATTACKING_MELEE,
     CHARGING,
-    RETREATING
+    RETREATING,
+    LAST_STAND
 }

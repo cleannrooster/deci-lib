@@ -76,6 +76,7 @@ final class DataDrivenBrain
                .ticksSinceLastHit(entity.getTicksSinceLastHit())
                .ticksSinceLastAttack(entity.getTicksSinceLastAttack())
                .recentDamageTaken(entity.getRecentDamageTaken())
+               .recentDamagePct(entity.getRecentDamageTaken() / entity.getMaxHealth())
                .lastHitWasProjectile(entity.wasLastHitProjectile());
 
         LivingEntity target = entity.getTarget();

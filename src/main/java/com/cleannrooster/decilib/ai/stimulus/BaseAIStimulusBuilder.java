@@ -22,6 +22,7 @@ public final class BaseAIStimulusBuilder
                 selfIsInLava,
                 selfIsHidden,
                 recentDamageTaken,
+                recentDamagePct,
                 lastHitWasProjectile,
                 isNearAnchor,
                 nearbyAllyCount,

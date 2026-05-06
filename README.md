@@ -38,16 +38,117 @@ This guide covers every field you can put in a mob data file under `data/<modid>
 
 ## Archetypes
 
-Archetypes wire up the high-level state machine. Pick one.
+Archetypes wire up the high-level state machine. Pick one. Each archetype has a default AI profile (see [AI Profiles](#ai-profiles)); individual axes can be overridden per mob.
 
 ### `bruiser`
 A heavy frontliner. Starts in `APPROACHING`, transitions to `ATTACKING_MELEE` when the target enters melee range, and returns to `APPROACHING` when out of range. Suitable for tanky melee fighters with charge abilities.
 
+**Default AI profile:** `RELENTLESS / ANYWHERE / STATIC / SOLO_PREDATOR`
+
+**Retreat behavior (when `aggression` is `CALCULATING`):** Enters `RETREATING` when health is more than 20% below the target's. Moves directly away to establish a fixed safety gap (~10 blocks) rather than fleeing to max range. Exits retreat when health recovers, LOS to the target is broken, or 4 seconds pass without taking a hit.
+
+**Retreat behavior (when `aggression` is `OPPORTUNIST`):** Same entry condition. Actively seeks cover positions (raycasts candidate points to find obstacles that break LOS) rather than running in a straight line. Exits retreat only when LOS is broken — no time-based fallback.
+
 ### `skirmisher`
-A mobile fighter. Has `APPROACHING` and `CHARGING` states wired up for dash/charge combos. Supports `ATTACKING_MELEE` for basic melee. Good for fast aggressive mobs.
+A mobile fighter. Has `APPROACHING` and `CHARGING` states wired up for dash/charge combos. Supports `ATTACKING_MELEE` for basic melee. Good for fast aggressive mobs. Also supports `FLEEING` (hard flee below 30% health regardless of aggression axis) and `RETREATING` (tactical retreat driven by the aggression model).
+
+**Default AI profile:** `CALCULATING / ANYWHERE / STATIC / SOLO_PREDATOR`
+
+**Retreat behavior (when `aggression` is `CALCULATING`):** Identical to bruiser — distance-establishing retreat, exits on health recovery, LOS break, or 4 s without being hit.
+
+**Retreat behavior (when `aggression` is `OPPORTUNIST`):** Identical to bruiser OPPORTUNIST — cover-seeking retreat, exits only on LOS break.
 
 ### `ambusher`
 A stealth attacker. Uses `HIDDEN → ACTIVE → REHIDING` state cycle. **Never enters `APPROACHING` or `ATTACKING_MELEE`** — attacks must be assigned to the `ACTIVE` state. Use `ambush` and `ambush_attack` features. Pair `melee` / `sweep` / `charge` features with `"state": "ACTIVE"`.
+
+**Default AI profile:** `OPPORTUNIST / PREDATORY / STATIC / SOLO_PREDATOR`
+
+---
+
+## AI Profiles
+
+An AI profile is a set of four independent decision axes that gate when a mob commits to offensive actions and how it behaves under pressure. Each axis evaluates the current combat situation and contributes a pass/fail vote; all four must pass for the combined offensive gate to open.
+
+Profiles are set per-archetype and can be overridden per mob definition.
+
+---
+
+### Aggression axis
+
+Controls *when* the mob commits to attacking and *how* it retreats when conditions are unfavorable.
+
+| Value | Offensive gate | Retreat behavior | Last stand |
+|---|---|---|---|
+| `RELENTLESS` | Always commits. Never retreats. | None. | Yes — enters `LAST_STAND` on near-death or burst hit (unless crushed or surrounded). |
+| `CALCULATING` | Commits when not at a >10% health disadvantage vs. target. | Enters `RETREATING` at >20% disadvantage. Moves directly away. Exits when health recovers, LOS breaks, or 4 s without being hit. | Yes — same conditions as RELENTLESS. |
+| `OPPORTUNIST` | Commits only when target is below 50% health. | Enters `RETREATING` at >20% health disadvantage. Actively steers toward cover. Exits **only** when LOS is broken. | **Never.** Only fights on favourable odds; being cornered is definitionally unfavourable. |
+
+**CALCULATING** is the tactician: it retreats when outmatched but commits again as soon as it is safe, regardless of whether it has fully recovered. The time-based exit (`ticksSinceLastHit > 80`) means a mob that successfully creates distance will re-engage even if the health balance has not shifted.
+
+**OPPORTUNIST** is the stalker: it will not leave cover until it cannot be seen. It only attacks weakened targets, so retreat is a deliberate repositioning to find a blind spot, not a panic run.
+
+### Last-stand conditions
+
+`LAST_STAND` is a dedicated combat state entered when the mob faces its final moments but still has will to fight. All offensive features fire unconditionally from this state.
+
+**Triggers** (any one activates):
+- Near death: `selfHealthPct < 0.15`
+- Burst hit: recent damage spike ≥ 20% of max health in the decay window
+
+**Blockers** (any one suppresses, checked after triggers):
+- `OPPORTUNIST` aggression — always blocked; a stalker never fights on cornered terms
+- `COWARD` target-eval with any nearby threat — coward folds rather than fighting
+- Crushed/hopeless: `fightProgressPct > 0.75` AND target health `> 0.65` — the mob has been slowly ground down against a dominant opponent and loses hope. A mob ambushed quickly to low health (low `fightProgressPct`) still has will to fight; one attritioned over a long fight does not.
+- Hopelessly surrounded: `nearbyThreatCount >= 3`
+
+---
+
+### Spatial axis
+
+Controls *where* the mob is willing to fight.
+
+| Value | Behavior |
+|---|---|
+| `ANYWHERE` | No spatial restrictions. Attacks from any position. |
+| `TERRITORIAL` | Only commits offensively when near its spawn anchor (within follow range). |
+| `PREDATORY` | Prefers striking when the target is cornered near an obstacle. *(Phase 1: always passes — real raycasting implementation pending.)* |
+| `SWARMER` | Only commits when at least 2 allied mobs are nearby (within ~12 blocks). |
+
+---
+
+### Adaptation axis
+
+Controls how the mob's offensive behavior evolves *over the course of a fight*.
+
+| Value | Behavior |
+|---|---|
+| `STATIC` | Behavior is identical throughout the fight. |
+| `ESCALATING` | Offensive features are locked until the mob has taken ≥30% of its max health as cumulative damage. Models a mob that starts restrained and escalates after absorbing enough punishment. |
+| `LEARNING` | Biases toward abilities that are landing and suppresses those being avoided. *(Phase 1 stub: always passes. Real implementation requires per-ability hit tracking — see [LEARNING implementation notes](#learning-implementation-notes).)* |
+
+---
+
+### Target evaluation axis
+
+Controls *which targets* the mob prioritizes.
+
+| Value | Behavior |
+|---|---|
+| `SOLO_PREDATOR` | Full aggression toward a single target. Ignores others. |
+| `PACK_HUNTER` | Deprioritizes its primary target when allied mobs are under attack. *(Phase 1 stub: always passes — needs ally damage event tracking.)* |
+| `COWARD` | Suppresses offensive actions when the target has companions nearby (within ~8 blocks). Only commits when facing a lone target. |
+
+---
+
+### LEARNING implementation notes
+
+`LEARNING` is the next major adaptation axis to implement. Key design constraints noted during the CALCULATING/OPPORTUNIST retreat pass:
+
+- **The combined gate is too coarse for per-ability learning.** `AdaptationModel.offensiveGate()` gates all offensive behavior at once. True LEARNING — biasing toward abilities with high hit rates and suppressing those being avoided — requires per-ability gating at the `GoalBinding` level, not via the combined gate.
+- **`declaredAbilityIds()` is the correct key.** Every `MobBrainGoal` already declares its ability IDs. These are the right identifiers for associating hit tracking data with individual behaviors.
+- **Hit tracking needs an explicit recording hook.** `ticksSinceLastHit` (already in stimulus) is a useful aggregate proxy, but per-ability tracking needs something like a `recordAbilityHit(String abilityId)` call that fires when an ability damages the target. This is not yet present; it needs a damage event callback at the goal or entity level.
+- **Storage belongs on the entity, not the stimulus.** A `Map<String, Float>` (abilityId → rolling hit rate) stored on `DataDrivenMob` is the right home. `DataDrivenBrain.buildStimulus()` can read it if a summary field is ever added to `AIStimulus`, but the raw map should stay on the entity to avoid polluting the stimulus interface with ability-specific data.
+- **Do not add per-ability data to `AIStimulus` yet.** Keep the interface clean until the shape of LEARNING is clear. The gate implementation may not need stimulus at all — it may operate directly on the entity reference passed to `GoalBinding`.
 
 ---
 
@@ -233,13 +334,13 @@ State names used in feature `"state"` fields:
 | `IDLE` | Not in combat, wandering/standing |
 | `WANDERING` | Actively walking to a wander point |
 | `APPROACHING` | In combat, moving toward target |
-| `FLEEING` | Running away |
 | `HIDDEN` | Ambusher state: submerged/hidden |
 | `ACTIVE` | Ambusher state: surfaced and attacking |
 | `REHIDING` | Ambusher state: returning to hide |
 | `ATTACKING_MELEE` | In melee range, executing basic attack |
 | `CHARGING` | Mid-charge ability |
 | `RETREATING` | Pulling back after an attack |
+| `LAST_STAND` | Desperate final push — mob charges unconditionally when near death |
 
 ---
 

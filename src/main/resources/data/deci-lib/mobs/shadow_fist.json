@@ -19,6 +19,12 @@
 
     }
   },
+  "ai_profile": {
+    "aggression": "RELENTLESS",
+    "spatial":"ANYWHERE",
+    "adaptation": "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
   "tuning": {
     "health":    "MEDIUM",
     "damage":    "LOW",

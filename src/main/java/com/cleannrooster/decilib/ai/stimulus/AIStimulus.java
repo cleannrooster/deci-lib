@@ -54,6 +54,9 @@ public interface AIStimulus {
 
     float recentDamageTaken();
 
+    /** {@link #recentDamageTaken()} normalised to max health. Used by last-stand burst trigger. */
+    float recentDamagePct();
+
     boolean lastHitWasProjectile();
 
     // -------------------------------------------------------------------------

@@ -19,6 +19,7 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     protected boolean selfIsInLava  = false;
     protected boolean selfIsHidden          = false;
     protected float   recentDamageTaken     = 0f;
+    protected float   recentDamagePct       = 0f;
     protected boolean lastHitWasProjectile  = false;
 
     // AiProfile axes
@@ -47,6 +48,7 @@ public abstract class AIStimulusBuilder<B extends AIStimulusBuilder<B, S>, S ext
     public B selfIsInLava(boolean v)           { this.selfIsInLava  = v;           return self(); }
     public B selfIsHidden(boolean v)              { this.selfIsHidden         = v; return self(); }
     public B recentDamageTaken(float v)           { this.recentDamageTaken    = v; return self(); }
+    public B recentDamagePct(float v)             { this.recentDamagePct      = v; return self(); }
     public B lastHitWasProjectile(boolean v)      { this.lastHitWasProjectile = v; return self(); }
     public B isNearAnchor(boolean v)              { this.isNearAnchor      = v; return self(); }
     public B nearbyAllyCount(int v)               { this.nearbyAllyCount   = v; return self(); }

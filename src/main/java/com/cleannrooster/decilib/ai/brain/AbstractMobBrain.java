@@ -172,8 +172,9 @@ public abstract class AbstractMobBrain<T extends LivingEntity,
             safeStop(entity, world, StopReason.PREEMPTED);
         }
 
-        // 6. Select a new goal when idle — only when stimulus is fresh
-        if (activeGoal == null && lastStimulusWasFresh) {
+        // 6. Select a new goal when idle, or preempt with a strictly higher-priority one.
+        // Committed goals are never preempted (they own the frame until done).
+        if (lastStimulusWasFresh) {
             try {
                 selectGoal(entity, world);
             } catch (Exception e) {
@@ -421,11 +422,19 @@ public abstract class AbstractMobBrain<T extends LivingEntity,
     }
 
     private void selectGoal(T entity, ServerWorld world) {
+        // Committed goals cannot be preempted — they own the frame (e.g. mid-burrow sequence).
+        if (activeGoal != null && activeGoal.isCommitted()) return;
+
         S       stance      = stateMachine.getCurrentStance();
         C       combatState = stateMachine.getCurrentCombatState();
         boolean debug       = debugListener != null; // null in production; non-null only when debug on
 
         for (GoalBinding<T, S, C> binding : goalBindings) {
+
+            // When a goal is running, only a strictly higher-priority binding can replace it.
+            // Bindings are sorted descending so once we reach the active priority level we stop.
+            if (activeGoal != null && activeBinding != null
+                    && binding.priority() <= activeBinding.priority()) break;
 
             if (circuitBreaker.isBlocked(binding, tickCount)) {
                 if (debug) debugListener.onEvent(new GoalSelectionEvent<>(binding, GoalSkipReason.CIRCUIT_BROKEN));
@@ -466,6 +475,18 @@ public abstract class AbstractMobBrain<T extends LivingEntity,
             if (!canStart) {
                 if (debug) debugListener.onEvent(new GoalSelectionEvent<>(binding, GoalSkipReason.CANNOT_START));
                 continue;
+            }
+
+            // Stop the current goal before starting the preempting one
+            if (activeGoal != null) {
+                if (debug) {
+                    LOGGER.info("[deci-lib][DEBUG] Preempting goal {} (pri {}) with {} (pri {})"
+                            + " — entity {} stance={} state={}",
+                            activeGoal.getClass().getSimpleName(), activeBinding.priority(),
+                            binding.goal().getClass().getSimpleName(), binding.priority(),
+                            entity.getId(), stance, combatState);
+                }
+                safeStop(entity, world, StopReason.PREEMPTED);
             }
 
             try {

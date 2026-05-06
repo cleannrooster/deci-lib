@@ -17,6 +17,7 @@ public record BaseAIStimulus(
         boolean selfIsInLava,
         boolean selfIsHidden,
         float recentDamageTaken,
+        float recentDamagePct,
         boolean lastHitWasProjectile,
         // AiProfile axes
         boolean isNearAnchor,
