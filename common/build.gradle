@@ -1,0 +1,20 @@
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+def platform = "fabric"
+
+repositories {
+    maven { url 'https://maven.shedaniel.me/' }
+    maven { url 'https://maven.azuredoom.com/mods' }
+}
+
+dependencies {
+    // Fabric Loader for @Environment annotations — do NOT use other Fabric Loader classes here.
+    modImplementation "net.fabricmc:fabric-loader:$project.fabric_loader_version"
+    // Fabric API for compilation of common code that references it (Fabric platform provides it at runtime).
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_api_version"
+
+    modImplementation "me.shedaniel.cloth:cloth-config-${platform}:${project.cloth_config_version}"
+    modImplementation "mod.azure.azurelib:azurelib-${platform}-${project.azure_mc_version}:${project.azurelib_version}"
+}

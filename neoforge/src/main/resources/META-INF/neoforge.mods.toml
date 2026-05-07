@@ -1,0 +1,41 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "CC0-1.0"
+
+[[mixins]]
+config = "decilib.mixins.json"
+
+[[mods]]
+modId = "decilib"
+version = "${version}"
+displayName = "deci-lib"
+description = "High-fidelity data-driven combat mob library."
+logoFile = "assets/decilib/icon.png"
+
+[[dependencies.decilib]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.decilib]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.decilib]]
+modId = "cloth_config"
+type = "required"
+versionRange = "[15,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.decilib]]
+modId = "azurelib"
+type = "optional"
+versionRange = "*"
+ordering = "NONE"
+side = "BOTH"

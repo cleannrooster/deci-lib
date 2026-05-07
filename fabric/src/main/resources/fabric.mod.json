@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "decilib",
+	"version": "${version}",
+	"name": "deci-lib",
+	"description": "High-fidelity data-driven combat mob library.",
+	"authors": [
+		"cleannrooster"
+	],
+	"contact": {},
+	"license": "CC0-1.0",
+	"icon": "assets/decilib/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.cleannrooster.decilib.DecilibFabric"
+		],
+		"client": [
+			"com.cleannrooster.decilib.client.DecilibClient"
+		]
+	},
+	"mixins": [
+		"decilib.mixins.json",
+		{
+			"config": "decilib.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": ">=15",
+		"azurelib": "~3.1.4"
+	}
+}
