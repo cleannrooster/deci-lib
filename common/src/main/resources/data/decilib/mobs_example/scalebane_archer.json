@@ -1,0 +1,77 @@
+{
+  "id": "scalebane_archer",
+  "faction": "scalebane",
+  "archetype": "skirmisher",
+  "theme": "fantasy",
+  "form": "azurelib",
+  "sounds": {
+    "hurt": "minecraft:item.wolf_armor.crack"
+  },
+  "render": {
+    "backend": "azurelib",
+    "assets": {
+         "geo":       "decilib:geo/scalebane_archer.geo.json",
+      "animation": "decilib:animations/scalebane.animation.json",
+      "texture":   "decilib:textures/entity/scalebane.png"
+    },
+    "loops": {
+      "idle":   "idle",
+      "idle_hostile":   "anim.hydra.hostile",
+      "moving": "walking",
+      "moving_hostile": "anim.hydra.running"
+    }
+  },
+  "ai_profile": {
+    "aggression": "RELENTLESS",
+    "spatial":"ANYWHERE",
+    "adaptation": "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
+  "scale": {
+    "width":  0.6,
+    "height": 1.6
+  },
+
+  "tuning": {
+    "health":    "MEDIUM",
+    "damage":    "LOW",
+    "speed":     "HIGH",
+    "detection": "MEDIUM"
+  },
+
+  "attributes": {
+    "max_health":           16.0,
+    "attack_damage":         2.0,
+    "movement_speed":         0.325,
+    "follow_range":          28.0,
+    "knockback_resistance":   0,
+    "melee_range":           2
+  },
+  "features": [
+    {
+      "type":                "idle",
+      "mode":                "wander",
+      "scan_interval_ticks": 40
+    },
+    {
+      "type": "ranged_attack",
+      "ability_id": "bow_attack_scalebane",
+      "engage_cooldown_ticks": 5,
+      "movement_mode": "KITE",
+      "projectile_type": "arrow",
+      "projectile_speed": 2.8,
+      "projectile_divergence": 1.0,
+      "windup_ticks": 5,
+      "shot_cooldown_ticks": 2,
+      "approach_speed": 0.0,
+      "preferred_distance": 8.0,
+      "fire_anim": "anim.hydra.fire",
+      "min_kite_distance": 6.0,
+      "kite_speed": 1.1,
+      "state": "APPROACHING",
+      "winddown_ticks": 20,
+      "winddown_movespeed": 0,
+      "priority": 20
+    }
+  ]
+}

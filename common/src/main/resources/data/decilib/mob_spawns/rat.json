@@ -1,0 +1,14 @@
+{
+  "mob_id": "rat",
+  "category": "monster",
+  "spawns": [
+    {
+      "weight": 8,
+      "group_size": [2, 6],
+      "biomes": ["#minecraft:is_overworld"],
+      "dimension": "minecraft:overworld",
+      "light_level": { "min": 0, "max": 7 },
+      "conditions": ["on_ground", "natural_only"]
+    }
+  ]
+}

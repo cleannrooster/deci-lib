@@ -79,6 +79,6 @@ public final class ChaseFeature implements BehaviorFeature {
                 abilityId, cooldown, chaseSpeed, engageRange, idleAttackWindow, maxDuration)
                 .withEffects(effects);
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

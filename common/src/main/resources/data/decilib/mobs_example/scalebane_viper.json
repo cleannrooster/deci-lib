@@ -1,0 +1,98 @@
+{
+  "id": "scalebane_viper",
+  "faction": "scalebane",
+  "archetype": "skirmisher",
+  "theme": "fantasy",
+  "form": "azurelib",
+  "sounds": {
+    "hurt": "minecraft:item.wolf_armor.crack"
+  },
+  "render": {
+    "backend": "azurelib",
+    "assets": {
+      "geo":       "decilib:geo/scalebane_viper.geo.json",
+      "animation": "decilib:animations/scalebane.animation.json",
+      "texture":   "decilib:textures/entity/scalebane.png"
+    },
+    "loops": {
+      "idle":   "idle",
+      "idle_hostile":   "anim.hydra.hostile_spear",
+      "moving": "walking",
+      "moving_hostile": "anim.hydra.running_spear_hostile"
+    }
+  },
+  "ai_profile": {
+    "aggression": "RELENTLESS",
+    "spatial":"ANYWHERE",
+    "adaptation": "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
+  "scale": {
+    "width":  0.6,
+    "height": 1.6
+  },
+
+  "tuning": {
+    "health":    "MEDIUM",
+    "damage":    "MEDIUM",
+    "speed":     "HIGH",
+    "detection": "MEDIUM"
+  },
+
+  "attributes": {
+    "max_health":           24.0,
+    "attack_damage":         6.0,
+    "movement_speed":         0.325,
+    "follow_range":          28.0,
+    "knockback_resistance":   0.25,
+    "melee_range":           4.5
+  },
+  "features": [
+    {
+      "type":                "idle",
+      "mode":                "wander",
+      "scan_interval_ticks": 40
+    },
+    {
+      "type": "ranged_attack",
+      "ability_id": "spear_attack_viper",
+      "engage_cooldown_ticks": 5,
+      "movement_mode": "KITE",
+      "projectile_type": "trident",
+      "projectile_speed": 2.8,
+      "projectile_divergence": 1.0,
+      "windup_ticks": 10,
+      "shot_cooldown_ticks": 2,
+      "approach_speed": 0.0,
+      "preferred_distance": 8.0,
+      "fire_anim": "anim.hydra.spear_throw",
+      "min_kite_distance": 6.0,
+      "kite_speed": 1.1,
+      "state": "APPROACHING",
+      "winddown_ticks": 30,
+      "winddown_movespeed": 0,
+      "priority": 20
+    },
+    {
+      "type": "charge",
+      "ability_id": "thrust_viper",
+      "cooldown_ticks": 120,
+      "min_cooldown_ticks": 80,
+      "charge_speed":          2,
+      "upwards_speed":         0.1,
+      "windup_ticks": 7,
+      "release_delay": 23,
+
+      "release_type": "arc",
+      "range": 4.5,
+      "coeff": 1.5,
+
+      "priority": 100,
+      "on_complete_particles": "sweep_arc",
+
+      "animations": {
+        "on_windup": "anim.hydra.spear_thrust"
+      }
+    }
+  ]
+}

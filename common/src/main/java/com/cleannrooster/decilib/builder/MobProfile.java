@@ -1,6 +1,7 @@
 package com.cleannrooster.decilib.builder;
 
 import com.cleannrooster.decilib.ai.profile.PartialAiProfile;
+import com.cleannrooster.decilib.builder.bossbar.BossBarConfig;
 import com.cleannrooster.decilib.builder.feature.FeatureConfig;
 import com.cleannrooster.decilib.builder.scale.ScaleProfile;
 import com.cleannrooster.decilib.builder.sound.SoundConfig;
@@ -25,7 +26,10 @@ public record MobProfile(
         @Nullable AzurelibRenderConfig renderConfig,
         @Nullable SoundConfig        soundConfig,
         @Nullable ScaleProfile       scaleProfile,
-        @Nullable PartialAiProfile   aiProfile
+        @Nullable PartialAiProfile   aiProfile,
+        @Nullable BossBarConfig      bossBarConfig,
+        /** Optional faction tag. Mobs sharing the same non-null faction never target each other. */
+        @Nullable String             faction
         ) {
     public MobProfile {
         features = List.copyOf(features);

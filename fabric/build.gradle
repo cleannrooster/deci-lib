@@ -38,6 +38,9 @@ configurations {
 repositories {
     maven { url 'https://maven.shedaniel.me/' }
     maven { url 'https://maven.azuredoom.com/mods' }
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 dependencies {

@@ -33,11 +33,15 @@ public final class ModEntities {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModEntities.class);
 
-    private static final String MOBS_PATH = "data/" + Decilib.MOD_ID + "/mobs";
+    private static final String MOBS_PATH         = "data/" + Decilib.MOD_ID + "/mobs";
+    private static final String MOBS_EXAMPLE_PATH = "data/" + Decilib.MOD_ID + "/mobs_example";
 
     // Populated during registerEntityTypes() — keyed by mob id.
     private static final Map<String, EntityType<DataDrivenMob>> DATA_DRIVEN_MOBS        = new LinkedHashMap<>();
     private static final Map<String, MobDefinition>             DATA_DRIVEN_DEFINITIONS = new LinkedHashMap<>();
+
+    // Tracks which mob IDs were loaded from the mobs_example folder.
+    private static final Set<String> EXAMPLE_MOB_IDS = new LinkedHashSet<>();
 
     // Attribute builders — used by platform entrypoints to register attributes.
     // Fabric: FabricDefaultAttributeRegistry.register(type, builder)
@@ -59,6 +63,15 @@ public final class ModEntities {
     /** Returns the {@link MobDefinition} for a registered data-driven mob id, or {@code null}. */
     public static MobDefinition getDefinition(String id) {
         return DATA_DRIVEN_DEFINITIONS.get(id);
+    }
+
+    /**
+     * Returns {@code true} if this mob ID was loaded from the {@code mobs_example} folder
+     * rather than the standard {@code mobs} folder. Used by the spawn system to conditionally
+     * suppress natural spawning based on the {@code exampleMobsNaturalSpawning} config flag.
+     */
+    public static boolean isExampleMob(String id) {
+        return EXAMPLE_MOB_IDS.contains(id);
     }
 
     /**
@@ -87,20 +100,34 @@ public final class ModEntities {
      * Fabric: before registry freeze in onInitialize.
      * NeoForge: inside RegisterEvent handler for RegistryKeys.ENTITY_TYPE.
      *
-     * @param modJarRoots root paths to scan (FabricLoader.getAllMods() or NeoForge ModList)
-     * @param isModLoaded platform predicate for mod-loaded checks (azurelib guard)
+     * @param modJarRoots        root paths to scan (FabricLoader.getAllMods() or NeoForge ModList)
+     * @param isModLoaded        platform predicate for mod-loaded checks (azurelib guard)
+     * @param includeExampleMobs if true, also scan {@code data/decilib/mobs_example/} in each
+     *                           root and track those mob IDs in {@link #EXAMPLE_MOB_IDS}
      */
     @SuppressWarnings("deprecation")
-    public static void registerEntityTypes(Iterable<Path> modJarRoots, Predicate<String> isModLoaded) {
+    public static void registerEntityTypes(Iterable<Path> modJarRoots,
+                                           Predicate<String> isModLoaded,
+                                           boolean includeExampleMobs) {
         for (Path root : modJarRoots) {
-            Path mobsDir = root.resolve(MOBS_PATH);
-            if (!Files.exists(mobsDir)) continue;
-            try (Stream<Path> paths = Files.walk(mobsDir)) {
-                paths.filter(p -> p.getFileName().toString().endsWith(".json"))
-                     .forEach(p -> registerFromPath(p, isModLoaded));
-            } catch (IOException e) {
-                LOGGER.error("[deci-lib] Failed to scan mob profiles in {}: {}", mobsDir, e.getMessage(), e);
+            // Standard mobs folder — always scanned.
+            scanDirectory(root.resolve(MOBS_PATH), isModLoaded, false);
+
+            // Example mobs folder — only scanned when the config flag is on.
+            if (includeExampleMobs) {
+                scanDirectory(root.resolve(MOBS_EXAMPLE_PATH), isModLoaded, true);
             }
+        }
+    }
+
+    /** Walks {@code dir} (if it exists) and registers every {@code .json} file found. */
+    private static void scanDirectory(Path dir, Predicate<String> isModLoaded, boolean markAsExample) {
+        if (!Files.exists(dir)) return;
+        try (Stream<Path> paths = Files.walk(dir)) {
+            paths.filter(p -> p.getFileName().toString().endsWith(".json"))
+                 .forEach(p -> registerFromPath(p, isModLoaded, markAsExample));
+        } catch (IOException e) {
+            LOGGER.error("[deci-lib] Failed to scan mob profiles in {}: {}", dir, e.getMessage(), e);
         }
     }
 
@@ -114,7 +141,7 @@ public final class ModEntities {
         for (var entry : DATA_DRIVEN_MOBS.entrySet()) {
             String id   = entry.getKey();
             var    type = entry.getValue();
-            Item egg = new SpawnEggItem(type, Colors.GRAY, Colors.WHITE, new Item.Settings());
+            Item egg = new SpawnEggItem(type, Colors.WHITE, Colors.WHITE, new Item.Settings());
             Registry.register(Registries.ITEM, Identifier.of(Decilib.MOD_ID, id + "_spawn_egg"), egg);
             SPAWN_EGGS.add(egg);
         }
@@ -122,7 +149,7 @@ public final class ModEntities {
 
     // -------------------------------------------------------------------------
 
-    private static void registerFromPath(Path path, Predicate<String> isModLoaded) {
+    private static void registerFromPath(Path path, Predicate<String> isModLoaded, boolean markAsExample) {
         com.cleannrooster.decilib.builder.MobProfile profile;
         try {
             profile = MobProfileLoader.load(path);
@@ -163,7 +190,9 @@ public final class ModEntities {
 
         DATA_DRIVEN_MOBS.put(def.id(), type);
         DATA_DRIVEN_DEFINITIONS.put(def.id(), def);
-        LOGGER.info("[deci-lib] Registered data-driven mob '{}'", def.id());
+        if (markAsExample) EXAMPLE_MOB_IDS.add(def.id());
+        LOGGER.info("[deci-lib] Registered data-driven mob '{}'{}", def.id(),
+                markAsExample ? " (example)" : "");
     }
 
     // -------------------------------------------------------------------------

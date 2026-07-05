@@ -2,6 +2,7 @@ package com.cleannrooster.decilib.builder;
 
 import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.builder.archetype.BaseStats;
+import com.cleannrooster.decilib.builder.bossbar.BossBarConfig;
 import com.cleannrooster.decilib.builder.feature.BehaviorComposer;
 import com.cleannrooster.decilib.builder.scale.ScaleProfile;
 import com.cleannrooster.decilib.builder.sound.SoundConfig;
@@ -23,5 +24,8 @@ public record MobDefinition(
         AiProfile        aiProfile,
         @Nullable AzurelibRenderConfig renderConfig,
         @Nullable SoundConfig          soundConfig,
-        @Nullable ScaleProfile scaleProfile
+        @Nullable ScaleProfile         scaleProfile,
+        @Nullable BossBarConfig        bossBarConfig,
+        /** Optional faction tag. Mobs sharing the same non-null faction never target each other. */
+        @Nullable String               faction
 ) {}

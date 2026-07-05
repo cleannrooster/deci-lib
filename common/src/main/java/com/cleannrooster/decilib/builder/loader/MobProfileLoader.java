@@ -8,6 +8,8 @@ import com.cleannrooster.decilib.ai.profile.TargetEvalModel;
 import com.cleannrooster.decilib.builder.AttributeOverrides;
 import com.cleannrooster.decilib.builder.MobProfile;
 import com.cleannrooster.decilib.builder.MobProfileException;
+import com.cleannrooster.decilib.builder.bossbar.BossBarConfig;
+import net.minecraft.entity.boss.BossBar;
 import com.cleannrooster.decilib.builder.feature.AnimationEffect;
 import com.cleannrooster.decilib.builder.feature.FeatureConfig;
 import com.cleannrooster.decilib.builder.feature.FeatureHooks;
@@ -186,7 +188,21 @@ public final class MobProfileLoader {
             );
         }
 
-        return new MobProfile(id, archetype, preset, tuning, attributeOverrides, form, theme, features, renderConfig, soundConfig, scaleProfile, aiProfile);
+        BossBarConfig bossBarConfig = null;
+        if (json.has("bossbar")) {
+            JsonObject bb = json.getAsJsonObject("bossbar");
+            BossBar.Color color = bb.has("color")
+                    ? parseBossBarEnum(BossBar.Color.class, bb.get("color").getAsString(), id, "color")
+                    : BossBar.Color.RED;
+            BossBar.Style style = bb.has("style")
+                    ? parseBossBarEnum(BossBar.Style.class, bb.get("style").getAsString(), id, "style")
+                    : BossBar.Style.PROGRESS;
+            bossBarConfig = new BossBarConfig(color, style);
+        }
+
+        String faction = json.has("faction") ? json.get("faction").getAsString() : null;
+
+        return new MobProfile(id, archetype, preset, tuning, attributeOverrides, form, theme, features, renderConfig, soundConfig, scaleProfile, aiProfile, bossBarConfig, faction);
     }
 
     // -------------------------------------------------------------------------
@@ -311,6 +327,19 @@ public final class MobProfileLoader {
                     .map(c -> c.name().toLowerCase())
                     .collect(java.util.stream.Collectors.joining(", "));
             throw new MobProfileException("Profile '" + profileId + "': invalid ai_profile."
+                    + field + " '" + raw + "'. Valid values: " + valid);
+        }
+    }
+
+    private static <E extends Enum<E>> E parseBossBarEnum(Class<E> enumType, String raw,
+                                                           String profileId, String field) {
+        try {
+            return Enum.valueOf(enumType, raw.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            var valid = java.util.Arrays.stream(enumType.getEnumConstants())
+                    .map(c -> c.name().toLowerCase())
+                    .collect(java.util.stream.Collectors.joining(", "));
+            throw new MobProfileException("Profile '" + profileId + "': invalid bossbar."
                     + field + " '" + raw + "'. Valid values: " + valid);
         }
     }

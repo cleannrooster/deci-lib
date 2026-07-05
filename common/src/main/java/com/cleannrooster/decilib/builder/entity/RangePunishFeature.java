@@ -98,6 +98,6 @@ public final class RangePunishFeature implements BehaviorFeature {
                 windup, safeZone, waveWidth, waveSpeed, maxRange, damage, coeff)
                 .withEffects(effects);
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

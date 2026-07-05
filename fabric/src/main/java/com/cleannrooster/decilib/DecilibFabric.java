@@ -1,8 +1,11 @@
 package com.cleannrooster.decilib;
 
+import com.cleannrooster.decilib.DeciLibConfig;
 import com.cleannrooster.decilib.builder.animation.AzurelibAnimationDispatcher;
 import com.cleannrooster.decilib.builder.animation.MobAnimationDispatcherRegistry;
+import com.cleannrooster.decilib.builder.loader.GlobalDatapackScanner;
 import com.cleannrooster.decilib.entity.ModEntities;
+import me.shedaniel.autoconfig.AutoConfig;
 import com.cleannrooster.decilib.spawn.MobSpawnRegistrar;
 import com.cleannrooster.decilib.spawn.MobSpawnReloadListener;
 import net.fabricmc.api.ModInitializer;
@@ -37,8 +40,16 @@ public class DecilibFabric implements ModInitializer {
             roots.addAll(container.getRootPaths());
         }
 
-        // Phase 1: register entity types.
-        ModEntities.registerEntityTypes(roots, FabricLoader.getInstance()::isModLoaded);
+        // Also scan global datapack loader directories (Paxi, OpenLoader, Global Packs, etc.)
+        // before the registry freezes — these are plain filesystem paths available at onInitialize.
+        boolean includeExamples = AutoConfig.getConfigHolder(DeciLibConfig.class)
+                .getConfig().registerExampleMobs;
+        try (GlobalDatapackScanner scanner = new GlobalDatapackScanner(
+                FabricLoader.getInstance().getGameDir())) {
+            roots.addAll(scanner.collectPackRoots());
+            // Phase 1: register entity types.
+            ModEntities.registerEntityTypes(roots, FabricLoader.getInstance()::isModLoaded, includeExamples);
+        }
 
         // Phase 2: register spawn eggs (immediately after entities on Fabric).
         ModEntities.registerSpawnEggs();
@@ -56,7 +67,12 @@ public class DecilibFabric implements ModInitializer {
         // Biome modification — Fabric API.
         BiomeModifications.create(Identifier.of(Decilib.MOD_ID, "mob_spawns"))
                 .add(ModificationPhase.ADDITIONS, ctx -> true, (ctx, mutable) -> {
+                    var cfg = AutoConfig.getConfigHolder(DeciLibConfig.class).getConfig();
                     for (var config : com.cleannrooster.decilib.spawn.MobSpawnRegistry.all()) {
+                        // Skip example mobs from biome spawn lists when natural spawning is off.
+                        if (ModEntities.isExampleMob(config.mobId()) && !cfg.exampleMobsNaturalSpawning) {
+                            continue;
+                        }
                         var rawType = ModEntities.getDataDrivenMobs().get(config.mobId());
                         if (rawType == null) {
                             Decilib.LOGGER.warn("[deci-lib] Biome modification: entity '{}' not registered, skipping",

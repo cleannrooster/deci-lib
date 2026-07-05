@@ -1,0 +1,67 @@
+{
+  "id": "scalebane_striker",
+  "faction": "scalebane",
+  "archetype": "bruiser",
+  "theme": "fantasy",
+  "form": "azurelib",
+  "sounds": {
+    "hurt": "minecraft:item.wolf_armor.crack"
+  },
+  "render": {
+    "backend": "azurelib",
+    "assets": {
+      "geo":       "decilib:geo/scalebane_striker.geo.json",
+      "animation": "decilib:animations/scalebane.animation.json",
+      "texture":   "decilib:textures/entity/scalebane.png"
+    },
+    "loops": {
+      "idle":   "idle",
+      "idle_hostile":   "anim.hydra.hostile_spear",
+      "moving": "walking",
+      "moving_hostile": "anim.hydra.running_spear_hostile"
+    }
+  },
+  "ai_profile": {
+    "aggression": "RELENTLESS",
+    "spatial":"ANYWHERE",
+    "adaptation": "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
+  "scale": {
+    "width":  0.6,
+    "height": 1.6
+  },
+
+  "tuning": {
+    "health":    "MEDIUM",
+    "damage":    "MEDIUM",
+    "speed":     "MEDIUM",
+    "detection": "MEDIUM"
+  },
+
+  "attributes": {
+    "max_health":           30.0,
+    "attack_damage":         6.0,
+    "movement_speed":         0.30,
+    "follow_range":          28.0,
+    "knockback_resistance":   0,
+    "melee_range":           3.5
+  },
+  "features": [
+    {
+      "type":                "idle",
+      "mode":                "wander",
+      "scan_interval_ticks": 40
+    },    
+	{
+      "type":           "melee",
+      "cooldown_ticks": 40,
+      "animations": {
+        "on_action": "anim.hydra.club_attack"
+      },
+      "sounds": {
+        "on_action": "minecraft:entity.player.attack.sweep"
+      }
+    }
+  ]
+}

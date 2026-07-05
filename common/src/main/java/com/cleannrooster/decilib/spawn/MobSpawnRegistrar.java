@@ -1,7 +1,9 @@
 package com.cleannrooster.decilib.spawn;
 
+import com.cleannrooster.decilib.DeciLibConfig;
 import com.cleannrooster.decilib.builder.entity.DataDrivenMob;
 import com.cleannrooster.decilib.entity.ModEntities;
+import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnLocationTypes;
 import net.minecraft.entity.SpawnReason;
@@ -47,10 +49,16 @@ public final class MobSpawnRegistrar {
      * calling the private SpawnRestriction.register() directly.
      */
     public static SpawnRestriction.SpawnPredicate<DataDrivenMob> buildSpawnPredicate(String mobId) {
-        return (entityType, world, reason, pos, random) ->
-                MobSpawnRegistry.get(mobId)
-                        .map(c -> anyEntryAllows(c.entries(), world, reason, pos))
-                        .orElse(false);
+        return (entityType, world, reason, pos, random) -> {
+            // Example mobs respect the exampleMobsNaturalSpawning config flag.
+            if (ModEntities.isExampleMob(mobId)) {
+                var cfg = AutoConfig.getConfigHolder(DeciLibConfig.class).getConfig();
+                if (!cfg.exampleMobsNaturalSpawning) return false;
+            }
+            return MobSpawnRegistry.get(mobId)
+                    .map(c -> anyEntryAllows(c.entries(), world, reason, pos))
+                    .orElse(false);
+        };
     }
 
     /**

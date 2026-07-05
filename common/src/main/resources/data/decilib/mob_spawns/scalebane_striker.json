@@ -1,0 +1,16 @@
+{
+  "mob_id": "scalebane_striker",
+  "category": "monster",
+  "spawns": [
+    {
+      "weight": 15,
+      "group_size": [2, 4],
+      "biomes": [     "#minecraft:allows_surface_slime_spawns",
+        "#minecraft:has_structure/jungle_temple",
+        "#minecraft:has_structure/trail_ruins"],
+      "dimension": "minecraft:overworld",
+      "light_level": { "min": 0, "max": 11 },
+      "conditions": ["on_ground", "natural_only"]
+    }
+  ]
+}

@@ -1,9 +1,12 @@
 package com.cleannrooster.decilib.neoforge;
 
 import com.cleannrooster.decilib.Decilib;
+import com.cleannrooster.decilib.DeciLibConfig;
 import com.cleannrooster.decilib.builder.animation.AzurelibAnimationDispatcher;
 import com.cleannrooster.decilib.builder.animation.MobAnimationDispatcherRegistry;
+import com.cleannrooster.decilib.builder.loader.GlobalDatapackScanner;
 import com.cleannrooster.decilib.entity.ModEntities;
+import me.shedaniel.autoconfig.AutoConfig;
 import com.cleannrooster.decilib.spawn.MobSpawnRegistrar;
 import com.cleannrooster.decilib.spawn.MobSpawnReloadListener;
 import net.minecraft.item.ItemGroup;
@@ -12,6 +15,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
@@ -49,8 +53,15 @@ public class DecilibNeoForge {
     private void onRegister(RegisterEvent event) {
         // ENTITY_TYPE — scan mod JARs and register all data-driven mobs.
         if (event.getRegistryKey().equals(RegistryKeys.ENTITY_TYPE)) {
-            List<Path> roots = collectModRoots();
-            ModEntities.registerEntityTypes(roots, id -> ModList.get().isLoaded(id));
+            boolean includeExamples = AutoConfig.getConfigHolder(DeciLibConfig.class)
+                    .getConfig().registerExampleMobs;
+            List<Path> roots = new ArrayList<>(collectModRoots());
+            // Also scan global datapack loader directories (Paxi, OpenLoader, Global Packs, etc.)
+            // before the registry freezes — these are plain filesystem paths available at startup.
+            try (GlobalDatapackScanner scanner = new GlobalDatapackScanner(FMLPaths.GAMEDIR.get())) {
+                roots.addAll(scanner.collectPackRoots());
+                ModEntities.registerEntityTypes(roots, id -> ModList.get().isLoaded(id), includeExamples);
+            }
             // SpawnRestrictions are registered via RegisterSpawnPlacementsEvent (NeoForge mod bus).
         }
 

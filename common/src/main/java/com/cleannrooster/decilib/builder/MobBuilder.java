@@ -118,7 +118,9 @@ public final class MobBuilder {
                 resolvedAiProfile,
                 resolved.renderConfig(),
                 resolved.soundConfig(),
-                scaleProfile
+                scaleProfile,
+                resolved.bossBarConfig(),
+                resolved.faction()
         );
     }
 }

@@ -180,9 +180,6 @@ public final class RangedAttackFeature implements BehaviorFeature {
                 .onWindupStart((mob, world) -> onWindupParticles.spawn(mob, world, 0f, 0f))
                 .onReloadComplete((mob, world) -> onReloadCompleteParticles.spawn(mob, world, 0f, 0f));
 
-        // Phase 2 TODO: RangedAttackFeature registers only a goal (no entry transition of its own).
-        // The AiProfile combinedGate cannot be applied here in Phase 1.
-        // Add a dedicated entry transition or gate inside RangedAttackBrainGoal.canStart().
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

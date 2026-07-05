@@ -2,7 +2,15 @@
   "item.decilib.shadow_fist_spawn_egg": "Shadow Fist Spawn Egg",
   "item.decilib.apex_predator_spawn_egg": "Apex Predator Spawn Egg",
   "entity.decilib.apex_predator": "Apex Predator",
-  "entity.decilib.shadow_fist": "Shadow Fist"
-
-
+  "entity.decilib.shadow_fist": "Shadow Fist",
+  "item.decilib.rat_spawn_egg": "Rat Spawn Egg",
+  "entity.decilib.rat": "Rat",
+  "item.decilib.dire_wolf_spawn_egg": "Dire Wolf Spawn Egg",
+  "entity.decilib.dire_wolf": "Dire Wolf",
+  "item.decilib.scalebane_striker_spawn_egg": "Scalebane Striker Spawn Egg",
+  "entity.decilib.scalebane_striker": "Scalebane Striker",
+  "item.decilib.scalebane_viper_spawn_egg": "Scalebane Viper Spawn Egg",
+  "entity.decilib.scalebane_viper": "Scalebane Viper",
+  "item.decilib.scalebane_archer_spawn_egg": "Scalebane Archer Spawn Egg",
+  "entity.decilib.scalebane_archer": "Scalebane Archer"
 }

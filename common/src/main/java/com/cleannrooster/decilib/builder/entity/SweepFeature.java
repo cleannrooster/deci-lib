@@ -71,9 +71,6 @@ public final class SweepFeature implements BehaviorFeature {
         var goal =
                 new ArcAttackBrainGoal<MobEntity>(abilityId, cooldown, minCd, halfAngle, range, 0f, coeff)
                         .withEffects(effects);
-        // Phase 2 TODO: SweepFeature registers only a goal (no entry transition of its own).
-        // The AiProfile gate is applied indirectly via the MeleeFeature entry transition.
-        // If sweep needs independent gating, add a dedicated entry transition here.
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

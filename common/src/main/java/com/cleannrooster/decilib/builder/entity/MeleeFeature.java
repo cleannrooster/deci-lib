@@ -60,6 +60,6 @@ public final class MeleeFeature implements BehaviorFeature {
                         && ctx.cooldowns().isReady(abilityId),
                 state, null, priority);
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

@@ -96,6 +96,6 @@ public final class ZoneDenialFeature implements BehaviorFeature {
                 hazardRadius, hazardDmg, interval, maxHazards, minDist, approachSpeed)
                 .withEffects(effects);
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

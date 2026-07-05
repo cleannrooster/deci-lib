@@ -1,0 +1,130 @@
+{
+  "id": "dire_wolf",
+  "archetype": "skirmisher",
+  "form": "azurelib",
+  "theme": "beast",
+
+  "render": {
+    "backend": "azurelib",
+    "assets": {
+      "geo":       "decilib:geo/direwolf.geo.json",
+      "animation": "decilib:animations/direwolf.animations.json",
+      "texture":   "decilib:textures/entity/dire_wolf.png"
+    },
+    "loops": {
+      "idle":           "animation.apex.idle",
+      "idle_hostile":   "animation.apex.idle_hostile",
+      "moving":         "animation.apex.moving",
+      "moving_hostile": "animation.apex.moving",
+      "running":        "animation.apex.running"
+    }
+  },
+
+  "ai_profile": {
+    "aggression":  "RELENTLESS",
+    "spatial":     "ANYWHERE",
+    "adaptation":  "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
+
+  "scale": {
+    "width":  1.8,
+    "height": 1.8
+  },
+
+  "tuning": {
+    "health":    "HIGH",
+    "damage":    "HIGH",
+    "speed":     "HIGH",
+    "detection": "HIGH"
+  },
+
+  "attributes": {
+    "max_health":           45.0,
+    "attack_damage":         9.0,
+    "movement_speed":        0.38,
+    "follow_range":         24.0,
+    "knockback_resistance":  0.2,
+    "melee_range":           2.0
+  },
+
+  "sounds": {
+    "idle":   "minecraft:entity.wolf.ambient",
+    "hurt":   "minecraft:entity.wolf.hurt",
+    "death":  "minecraft:entity.wolf.death",
+    "step":   "minecraft:entity.wolf.step",
+    "attack": "minecraft:entity.wolf.growl"
+  },
+
+  "features": [
+    {
+      "type":         "idle",
+      "mode":         "wander",
+      "wander_range": 12.0,
+      "pause_ticks":  60,
+      "scan_interval_ticks": 30
+    },
+
+    {
+      "type":           "melee",
+      "ability_id":     "wolf_bite",
+      "cooldown_ticks": 25,
+      "priority":       60,
+      "animations": {
+        "on_action": "animation.apex.attack_lunge"
+      }
+    },
+
+    {
+      "type":                  "gapclose",
+      "ability_id":            "wolf_lunge",
+      "cooldown_ticks":        80,
+      "windup_ticks":          10,
+      "release_delay":         6,
+      "min_distance":          3.0,
+      "leap_speed":            1.8,
+      "leap_height":           0.2,
+      "landing_damage_coeff":  1.5,
+      "landing_range":         1.5,
+      "priority":              100,
+      "on_start_particles":    "dust_trail",
+      "on_complete_particles": "poof_burst",
+      "animations": {
+        "on_windup":  "animation.apex.attack_lunge"
+      }
+    },
+
+    {
+      "type":               "chase",
+      "ability_id":         "wolf_chase",
+      "cooldown_ticks":     30,
+      "chase_speed":        0.55,
+      "engage_range":       20.0,
+      "max_duration_ticks": 200,
+      "priority":           80,
+      "on_start_particles": "dust_trail"
+    },
+
+    {
+      "type": "charge",
+      "ability_id": "swipe_wolf",
+      "cooldown_ticks": 120,
+      "min_cooldown_ticks": 80,
+      "charge_speed":          0,
+      "upwards_speed":         0,
+      "windup_ticks": 5,
+      "release_delay": 35,
+
+      "release_type": "arc",
+      "range": 4.5,
+      "coeff": 1.5,
+
+      "priority": 100,
+      "on_complete_particles": "sweep_arc",
+
+      "animations": {
+        "on_windup": "animation.apex.sweep"
+      }
+    }
+  ]
+}

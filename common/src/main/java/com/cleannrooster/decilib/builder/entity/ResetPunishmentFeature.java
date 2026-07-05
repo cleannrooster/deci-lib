@@ -96,6 +96,6 @@ public final class ResetPunishmentFeature implements BehaviorFeature {
                 interruptRange, healAmount, healFraction, approachSpeed)
                 .withEffects(effects);
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

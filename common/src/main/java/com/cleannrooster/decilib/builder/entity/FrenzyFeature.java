@@ -142,6 +142,6 @@ public final class FrenzyFeature implements BehaviorFeature {
                 priority
         );
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
     }
 }

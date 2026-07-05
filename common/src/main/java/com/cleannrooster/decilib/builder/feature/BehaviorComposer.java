@@ -1,5 +1,6 @@
 package com.cleannrooster.decilib.builder.feature;
 
+import com.cleannrooster.decilib.ai.goal.GatedBrainGoal;
 import com.cleannrooster.decilib.ai.goal.MobBrainGoal;
 import com.cleannrooster.decilib.ai.profile.AiProfile;
 import com.cleannrooster.decilib.ai.statemachine.TransitionContext;
@@ -66,6 +67,21 @@ public final class BehaviorComposer {
     public void addStanceTransition(@Nullable MobStance from, Predicate<TransitionContext> condition,
                                      MobStance to, int priority) {
         stanceTransitions.add(new StanceTransitionEntry(from, condition, to, priority));
+    }
+
+    /**
+     * Registers an offensive goal — one that represents attacking or pursuing the
+     * target. Automatically wraps the goal with {@link AiProfile#combinedStimulusGate()}
+     * so that {@code canStart} is suppressed when the AI profile's conditions are not
+     * met (e.g. SWARMER requires allies nearby, OPPORTUNIST requires target below 50% health).
+     *
+     * <p>Use this instead of {@link #addGoal} for any goal that represents an attack,
+     * pursuit, or offensive action. Defensive and utility goals (idle, brace, reposition,
+     * leave_hazard, ambush lifecycle) should continue to use {@link #addGoal}.
+     */
+    public void addOffensiveGoal(MobBrainGoal<?> goal, Set<MobState> states, int priority) {
+        var gate = aiProfile.combinedStimulusGate();
+        addGoal(new GatedBrainGoal<>(goal, gate), states, priority);
     }
 
     /**

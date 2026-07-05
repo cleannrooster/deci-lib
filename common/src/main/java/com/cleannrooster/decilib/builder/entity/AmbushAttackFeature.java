@@ -132,6 +132,6 @@ public final class AmbushAttackFeature implements BehaviorFeature {
                 5
         );
 
-        composer.addGoal(goal, Set.of(MobState.ACTIVE), priority);
+        composer.addOffensiveGoal(goal, Set.of(MobState.ACTIVE), priority);
     }
 }

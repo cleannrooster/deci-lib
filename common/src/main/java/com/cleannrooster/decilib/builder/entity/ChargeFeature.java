@@ -127,7 +127,7 @@ public final class ChargeFeature implements BehaviorFeature {
                 null,
                 15
         );
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
         composer.addTransition(state, ctx -> true, MobState.APPROACHING, null, 5);
     }
 

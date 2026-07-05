@@ -1,11 +1,13 @@
 package com.cleannrooster.decilib.builder.entity;
 
+import com.cleannrooster.decilib.DeciLibConfig;
 import com.cleannrooster.decilib.ai.CanBrace;
 import com.cleannrooster.decilib.ai.CanBulwark;
 import com.cleannrooster.decilib.ai.ambush.CanAmbush;
 import com.cleannrooster.decilib.ai.brain.BrainGoalWrapper;
 import com.cleannrooster.decilib.ai.brain.MobBrain;
 import com.cleannrooster.decilib.builder.MobDefinition;
+import me.shedaniel.autoconfig.AutoConfig;
 import com.cleannrooster.decilib.builder.MobState;
 import com.cleannrooster.decilib.builder.archetype.BaseStats;
 import com.cleannrooster.decilib.builder.sound.SoundConfig;
@@ -22,7 +24,9 @@ import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.boss.BossBar;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.entity.ai.pathing.PathNodeType;
@@ -31,6 +35,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -77,6 +82,10 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
 
     // AiProfile — total raw damage absorbed this fight (for fightProgressPct / ESCALATING)
     private float totalDamageTaken = 0f;
+
+    // Bossbar — null when the mob has no bossbar config or is running on the client
+    @Nullable private ServerBossBar bossBar = null;
+    @Nullable private ServerPlayerEntity bossBarTarget = null;
 
     @Override
     public float getPathfindingPenalty(PathNodeType nodeType) {
@@ -159,6 +168,11 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
         applyAttribute(EntityAttributes.GENERIC_FOLLOW_RANGE,         stats.followRange());
         applyAttribute(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, stats.knockbackResistance());
         this.setHealth(this.getMaxHealth());
+
+        if (definition.bossBarConfig() != null && !world.isClient()) {
+            var cfg = definition.bossBarConfig();
+            this.bossBar = new ServerBossBar(this.getDisplayName(), cfg.color(), cfg.style());
+        }
     }
 
     private static EntityType<? extends DataDrivenMob> capture(
@@ -213,6 +227,15 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
 
 
     @Override
+    public void onRemoved() {
+        super.onRemoved();
+        if (bossBar != null) {
+            bossBar.clearPlayers();
+            bossBarTarget = null;
+        }
+    }
+
+    @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty,
                                  SpawnReason spawnReason, @Nullable EntityData entityData) {
         EntityData data = super.initialize(world, difficulty, spawnReason, entityData);
@@ -227,6 +250,19 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
 
     @Override
     public boolean damage(DamageSource source, float amount) {
+        // Friendly fire: scale damage when the attacker is a same-faction mob.
+        // Intentional targeting is already blocked by setTarget(); this covers
+        // incidental hits (AoE, projectile splash, explosions, etc.).
+        if (amount > 0 && source.getAttacker() instanceof DataDrivenMob attacker) {
+            String myFaction       = definition.faction();
+            String attackerFaction = attacker.getDefinition().faction();
+            if (myFaction != null && myFaction.equals(attackerFaction)) {
+                float coeff = AutoConfig.getConfigHolder(DeciLibConfig.class)
+                        .getConfig().friendlyFireCoefficient;
+                amount *= coeff;
+                if (amount <= 0) return false;
+            }
+        }
         // Bulwark: block (and optionally reflect) incoming projectile damage
         if (bulwarkActive && source.isIn(DamageTypeTags.IS_PROJECTILE)) {
             if (bulwarkReflect > 0 && getWorld() instanceof ServerWorld sw
@@ -273,6 +309,32 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
     }
 
     @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        // Never target a same-faction ally — faction membership is determined by the
+        // string faction tag in each mob's definition. Null faction = no faction.
+        if (target instanceof DataDrivenMob ally) {
+            String myFaction    = definition.faction();
+            String theirFaction = ally.getDefinition().faction();
+            if (myFaction != null && myFaction.equals(theirFaction)) {
+                return;
+            }
+        }
+        super.setTarget(target);
+        if (bossBar == null) return;
+
+        ServerPlayerEntity newTarget = target instanceof ServerPlayerEntity p ? p : null;
+        if (newTarget != bossBarTarget) {
+            if (bossBarTarget != null) bossBar.removePlayer(bossBarTarget);
+            bossBarTarget = newTarget;
+            if (bossBarTarget != null) {
+                bossBar.setName(this.getDisplayName());
+                bossBar.setPercent(getHealth() / getMaxHealth());
+                bossBar.addPlayer(bossBarTarget);
+            }
+        }
+    }
+
+    @Override
     public void tick() {
         if (!getWorld().isClient()) loopAnimTracker.tick(this);
         super.tick();
@@ -280,6 +342,7 @@ public class DataDrivenMob extends HostileEntity implements CanAmbush, CanBrace,
         if (ticksSinceLastHit    < Integer.MAX_VALUE / 2) ticksSinceLastHit++;
         if (ticksSinceLastAttack < Integer.MAX_VALUE / 2) ticksSinceLastAttack++;
         if (recentDamageTaken > 0) recentDamageTaken = Math.max(0f, recentDamageTaken - RECENT_DAMAGE_DECAY);
+        if (bossBar != null && bossBarTarget != null) bossBar.setPercent(getHealth() / getMaxHealth());
     }
 
     public boolean isEmerging()              { return emergeTicks > 0; }

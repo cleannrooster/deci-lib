@@ -120,7 +120,7 @@ public final class GapcloseFeature implements BehaviorFeature {
                 priority
         );
 
-        composer.addGoal(goal, Set.of(state), priority);
+        composer.addOffensiveGoal(goal, Set.of(state), priority);
         composer.addTransition(state, ctx -> true, MobState.APPROACHING, null, 5);
     }
 }

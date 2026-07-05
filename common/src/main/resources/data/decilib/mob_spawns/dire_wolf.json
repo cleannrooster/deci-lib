@@ -1,0 +1,14 @@
+{
+  "mob_id": "dire_wolf",
+  "category": "monster",
+  "spawns": [
+    {
+      "weight": 5,
+      "group_size": [1,1],
+      "biomes": ["#minecraft:is_overworld"],
+      "dimension": "minecraft:overworld",
+      "light_level": { "min": 0, "max": 7 },
+      "conditions": ["on_ground", "natural_only"]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "id": "rat",
+  "archetype": "skirmisher",
+  "form": "azurelib",
+  "theme": "beast",
+
+  "render": {
+    "backend": "azurelib",
+    "assets": {
+      "geo":       "decilib:geo/rat.geo.json",
+      "animation": "decilib:animations/rat.animations.json",
+      "texture":   "decilib:textures/entity/rat.png"
+    },
+    "loops": {
+      "idle":           "anim.rat.idle_calm",
+      "idle_hostile":   "anim.rat.idle_alert_aggro",
+      "moving":         "anim.rat.skitter",
+      "moving_hostile": "anim.rat.skitter",
+      "running":        "anim.rat.skitter"
+    }
+  },
+
+  "ai_profile": {
+    "aggression":  "CALCULATING",
+    "spatial":     "SWARMER",
+    "adaptation":  "STATIC",
+    "target_eval": "SOLO_PREDATOR"
+  },
+
+  "scale": {
+    "width":  0.4,
+    "height": 0.4
+  },
+
+  "tuning": {
+    "health":    "LOW",
+    "damage":    "LOW",
+    "speed":     "HIGH",
+    "detection": "MEDIUM"
+  },
+
+  "attributes": {
+    "max_health":      8.0,
+    "attack_damage":   2.0,
+    "movement_speed":  0.35,
+    "follow_range":   16.0,
+    "melee_range":     1.2
+  },
+
+  "sounds": {
+    "idle":   "minecraft:entity.silverfish.ambient",
+    "hurt":   "minecraft:entity.silverfish.hurt",
+    "death":  "minecraft:entity.silverfish.death",
+    "step":   "minecraft:entity.silverfish.step",
+    "attack": "minecraft:entity.silverfish.hurt"
+  },
+
+  "features": [
+    {
+      "type":         "idle",
+      "mode":         "wander",
+      "wander_range": 8.0,
+      "pause_ticks":  30,
+      "scan_interval_ticks": 20
+    },
+
+    {
+      "type":           "melee",
+      "cooldown_ticks": 30,
+      "priority":       60
+    },
+
+    {
+      "type":                    "gapclose",
+      "ability_id":              "rat_leap",
+      "cooldown_ticks":          120,
+      "windup_ticks":            8,
+      "release_delay":           4,
+      "min_distance":            2.0,
+      "leap_speed":              0.6,
+      "leap_height":             0.2,
+      "landing_damage_coeff":    0.8,
+      "landing_range":           1.0,
+      "priority":                80,
+      "state": "APPROACHING"
+
+    },
+
+    {
+      "type":             "chase",
+      "ability_id":       "rat_skitter",
+      "cooldown_ticks":   40,
+      "chase_speed":      0.45,
+      "engage_range":     12.0,
+      "max_duration_ticks": 100,
+      "priority":         40,
+      "state": "APPROACHING",
+      "on_start_particles": "dust_trail"
+    }
+  ]
+}

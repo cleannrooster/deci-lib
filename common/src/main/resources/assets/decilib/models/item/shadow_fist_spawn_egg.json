@@ -1,4 +1,7 @@
 {
-  "parent": "item/template_spawn_egg"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "decilib:item/shadow_fist_spawn_egg"
+  }
 }
 

@@ -24,6 +24,6 @@ public final class BurrowerPreset implements Preset {
 
         return new MobProfile(base.id(), archetype, null, base.tuning(), base.attributeOverrides(),
                 base.form(), base.theme(), features, base.renderConfig(), base.soundConfig(),
-                base.scaleProfile(), base.aiProfile());
+                base.scaleProfile(), base.aiProfile(), base.bossBarConfig(), base.faction());
     }
 }

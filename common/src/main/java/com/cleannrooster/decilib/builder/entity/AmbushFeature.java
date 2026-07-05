@@ -112,10 +112,10 @@ public final class AmbushFeature implements BehaviorFeature {
         composer.addGoal(module.surfaceGoal(),     Set.of(MobState.ACTIVE),  100);
         composer.addGoal(module.enterHidingGoal(), Set.of(MobState.REHIDING),  5);
 
-        composer.addGoal(new ApproachTargetBrainGoal<>(approachSpeed),
+        composer.addOffensiveGoal(new ApproachTargetBrainGoal<>(approachSpeed),
                 Set.of(MobState.ACTIVE), 8);
 
-        composer.addGoal(new MeleeAttackBrainGoal<>(ABILITY_MELEE, 20),
+        composer.addOffensiveGoal(new MeleeAttackBrainGoal<>(ABILITY_MELEE, 20),
                 Set.of(MobState.ACTIVE), 10);
     }
 }
