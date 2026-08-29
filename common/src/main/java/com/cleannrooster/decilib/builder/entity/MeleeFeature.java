@@ -57,6 +57,7 @@ public final class MeleeFeature implements BehaviorFeature {
 
         composer.addOffensiveTransition(null,
                 ctx -> ctx.stimulus().targetInMeleeRange()
+                        && ctx.stimulus().hasLineOfSight()
                         && ctx.cooldowns().isReady(abilityId),
                 state, null, priority);
 

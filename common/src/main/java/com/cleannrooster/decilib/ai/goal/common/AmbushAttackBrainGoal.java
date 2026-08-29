@@ -166,7 +166,10 @@ public class AmbushAttackBrainGoal<E extends MobEntity & CanAmbush> implements M
 
     @Override
     public boolean shouldContinue(E entity, AIStimulus stimulus) {
-        return !surfaced && stimulus.hasTarget();
+        return !surfaced
+                && stimulus.hasTarget()
+                && stimulus.hasLineOfSight()
+                && !stimulus.targetInMeleeRange();
     }
 
     @Override

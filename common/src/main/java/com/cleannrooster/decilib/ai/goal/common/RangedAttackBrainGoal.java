@@ -184,6 +184,7 @@ public class RangedAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<
         }
 
         entity.getLookControl().lookAt(target, 30f, 30f);
+        faceTarget(entity, target);
 
         switch (phase) {
             case IDLE         -> tickIdle(entity, world, stimulus, target, cooldowns);
@@ -425,6 +426,21 @@ public class RangedAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<
     }
 
     // ── Utility ──────────────────────────────────────────────────────────────
+
+    /**
+     * Turns yaw, body and head fully at the target every tick. Look control alone
+     * only turns the head, leaving the body up to ~75° off. While the mob is
+     * actively pathing, the move control re-asserts travel yaw after this runs,
+     * so moving mobs still face their direction of travel.
+     */
+    private static void faceTarget(MobEntity entity, LivingEntity target) {
+        double dx  = target.getX() - entity.getX();
+        double dz  = target.getZ() - entity.getZ();
+        float  yaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90f;
+        entity.setYaw(yaw);
+        entity.setBodyYaw(yaw);
+        entity.setHeadYaw(yaw);
+    }
 
     private void triggerAnim(E entity, @Nullable String anim) {
         if (anim != null && entity instanceof DataDrivenMob ddm) {

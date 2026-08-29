@@ -50,7 +50,9 @@ public class ArcAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<E> 
 
     @Override
     public boolean canStart(AIStimulus stimulus, ReadOnlyCooldownRegistry cooldowns) {
-        return stimulus.targetInMeleeRange() && cooldowns.isReady(abilityId);
+        return stimulus.targetInMeleeRange()
+                && stimulus.hasLineOfSight()
+                && cooldowns.isReady(abilityId);
     }
 
     @Override
@@ -70,7 +72,9 @@ public class ArcAttackBrainGoal<E extends MobEntity> implements MobBrainGoal<E> 
         if (effects != null && effects.onTick() != null)   effects.onTick().accept(entity, world);
 
         var target = entity.getTarget();
-        if (target == null || !RangePredicates.isValidTarget(target)) {
+        if (target == null
+                || !RangePredicates.isValidTarget(target)
+                || !RangePredicates.hasLineOfSight(entity, target)) {
             done = true;
             return;
         }

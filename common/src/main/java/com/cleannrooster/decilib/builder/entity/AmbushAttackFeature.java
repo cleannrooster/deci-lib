@@ -115,6 +115,7 @@ public final class AmbushAttackFeature implements BehaviorFeature {
         composer.addOffensiveTransition(
                 MobState.APPROACHING,
                 ctx -> ctx.stimulus().hasTarget()
+                        && ctx.stimulus().hasLineOfSight()
                         && !ctx.stimulus().targetInMeleeRange()
                         && ctx.cooldowns().isReady(abilityId),
                 MobState.ACTIVE,

@@ -17,7 +17,6 @@ public class AzurelibMobAnimator extends AzEntityAnimator<DataDrivenMob> {
     @Override
     public void registerControllers(AzAnimationControllerContainer<DataDrivenMob> container) {
         container.add(AzAnimationController.builder(this, "movement_loop").setTransitionLength(2).build());
-        container.add(AzAnimationController.builder(this, "movement").setTransitionLength(0).build());
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal<E> {
 
@@ -21,6 +22,7 @@ public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal
     private final int                        windupTicks;
     private final int                        interruptCooldownTicks;
     private final boolean                    abortOnTargetLoss;
+    private final Predicate<AIStimulus>      continueCondition;
     private final Consumer<E>                onWindupStart;
     private final Consumer<E>                onWindupEnd;
     private final Consumer<E>                onInterruptHook;
@@ -40,6 +42,7 @@ public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal
         this.releaseDelay              = b.releaseDelay;
         this.interruptCooldownTicks = b.interruptCooldownTicks;
         this.abortOnTargetLoss      = b.abortOnTargetLoss;
+        this.continueCondition      = b.continueCondition;
         this.onWindupStart     = b.onWindupStart   != null ? b.onWindupStart   : e -> {};
         this.onWindupEnd       = b.onWindupEnd     != null ? b.onWindupEnd     : e -> {};
         this.onInterruptHook   = b.onInterruptHook != null ? b.onInterruptHook : e -> {};
@@ -93,7 +96,9 @@ public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal
 
     @Override
     public boolean shouldContinue(E entity, AIStimulus stimulus) {
-        return !released && (!abortOnTargetLoss || stimulus.hasTarget());
+        return !released
+                && (!abortOnTargetLoss || stimulus.hasTarget())
+                && continueCondition.test(stimulus);
     }
 
     @Override
@@ -151,6 +156,7 @@ public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal
 
         private int                        interruptCooldownTicks;
         private boolean                    abortOnTargetLoss = true;
+        private Predicate<AIStimulus>      continueCondition = stimulus -> true;
         private Consumer<E>                onWindupStart;
         private Consumer<E>                onWindupEnd;
         private Consumer<E>                onInterruptHook;
@@ -176,6 +182,7 @@ public class ChargeReleaseBrainGoal<E extends MobEntity> implements MobBrainGoal
          */
         public Builder<E> interruptCooldownTicks(int v)             { this.interruptCooldownTicks = v; return this; }
         public Builder<E> abortOnTargetLoss(boolean v)              { this.abortOnTargetLoss = v;  return this; }
+        public Builder<E> continueWhile(Predicate<AIStimulus> fn)    { this.continueCondition = fn; return this; }
         public Builder<E> onWindupStart(Consumer<E> fn)             { this.onWindupStart    = fn;  return this; }
         public Builder<E> onWindupEnd(Consumer<E> fn)               { this.onWindupEnd      = fn;  return this; }
         public Builder<E> onInterrupt(Consumer<E> fn)               { this.onInterruptHook  = fn;  return this; }

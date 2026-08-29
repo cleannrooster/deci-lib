@@ -35,6 +35,7 @@ public final class DamageUtil {
             if (entity == attacker ) continue;
             if (!RangePredicates.isValidTarget(entity)) continue;
             if (attacker.isTeammate(entity)) continue;
+            if (!RangePredicates.hasLineOfSight(attacker, entity)) continue;
 
             var distSq = attacker.squaredDistanceTo(entity);
             if (distSq > range * range) continue;
@@ -64,6 +65,7 @@ public final class DamageUtil {
             if (entity == attacker) continue;
             if (!RangePredicates.isValidTarget(entity)) continue;
             if (attacker.isTeammate(entity)) continue;
+            if (!RangePredicates.hasLineOfSight(attacker, entity)) continue;
 
             if (attacker.squaredDistanceTo(entity) <= range * range) {
                 entity.damage(source, damage);
@@ -89,6 +91,7 @@ public final class DamageUtil {
             if (entity == attacker) continue;
             if (!RangePredicates.isValidTarget(entity)) continue;
             if (attacker.isTeammate(entity)) continue;
+            if (!RangePredicates.hasLineOfSight(attacker, entity)) continue;
 
             var distSq = attacker.squaredDistanceTo(entity);
             if (distSq >= innerRadius * innerRadius && distSq <= outerRadius * outerRadius) {

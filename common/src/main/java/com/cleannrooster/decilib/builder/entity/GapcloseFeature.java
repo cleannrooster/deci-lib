@@ -81,6 +81,8 @@ public final class GapcloseFeature implements BehaviorFeature {
         var goal = new ChargeReleaseBrainGoal.Builder<MobEntity>(abilityId, cooldown, windup, releaseDelay)
                 .interruptCooldownTicks(windup)
                 .abortOnTargetLoss(true)
+                .continueWhile(stimulus -> !teleportMode
+                        || (stimulus.hasLineOfSight() && stimulus.targetDistance() > minDist))
                 .onWindupStart(entity -> {
                     entity.getNavigation().stop();
                     var target = entity.getTarget();
@@ -113,6 +115,7 @@ public final class GapcloseFeature implements BehaviorFeature {
         composer.addOffensiveTransition(
                 MobState.APPROACHING,
                 ctx -> ctx.stimulus().hasTarget()
+                        && (!teleportMode || ctx.stimulus().hasLineOfSight())
                         && ctx.stimulus().targetDistance() > minDist
                         && ctx.cooldowns().isReady(abilityId),
                 state,
